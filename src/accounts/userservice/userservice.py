@@ -67,11 +67,12 @@ def create_app():
     def create_user():
         """Create a user record.
 
-        Fails if that username already exists.
+        Fails if that email or username already exists.
 
         Generates a unique accountid.
 
         request fields:
+        - email
         - username
         - password
         - password-repeat
@@ -88,6 +89,11 @@ def create_app():
             app.logger.debug('Sanitizing input.')
             req = {k: bleach.clean(v) for k, v in request.form.items()}
             __validate_new_user(req)
+
+            # Check if email already exists
+            if users_db.email_exists(req['email']):
+                raise NameError('user with email {} already exists'.format(req['email']))
+
             # Check if user already exists
             if users_db.get_user(req['username']) is not None:
                 raise NameError('user {} already exists'.format(req['username']))
@@ -113,6 +119,7 @@ def create_app():
                 'state': req['state'],
                 'zip': req['zip'],
                 'ssn': req['ssn'],
+                'email': req['email'],  # Add email field
             }
             # Add user_data to database
             app.logger.debug("Adding user to the database")
@@ -135,6 +142,7 @@ def create_app():
         app.logger.debug('validating create user request: %s', str(req))
         # Check if required fields are filled
         fields = (
+            'email',
             'username',
             'password',
             'password-repeat',
@@ -152,6 +160,10 @@ def create_app():
         if any(not bool(req[f] or req[f].strip()) for f in fields):
             raise UserWarning('missing value for input field(s)')
 
+        # Verify email format
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", req['email']):
+            raise UserWarning('invalid email format')
+
         # Verify username contains only 2-15 alphanumeric or underscore characters
         if not re.match(r"\A[a-zA-Z0-9_]{2,15}\Z", req['username']):
             raise UserWarning('username must contain 2-15 alphanumeric characters or underscores')
@@ -163,24 +175,24 @@ def create_app():
     def login():
         """Login a user and return a JWT token
 
-        Fails if username doesn't exist or password doesn't match hash
+        Fails if email doesn't exist or password doesn't match hash
 
         token expiry time determined by environment variable
 
         request fields:
-        - username
+        - email
         - password
         """
         app.logger.debug('Sanitizing login input.')
-        username = bleach.clean(request.args.get('username'))
+        email = bleach.clean(request.args.get('email'))
         password = bleach.clean(request.args.get('password'))
 
         # Get user data
         try:
             app.logger.debug('Getting the user data.')
-            user = users_db.get_user(username)
+            user = users_db.get_user_by_email(email)
             if user is None:
-                raise LookupError('user {} does not exist'.format(username))
+                raise LookupError('user with email {} does not exist'.format(email))
 
             # Validate the password
             app.logger.debug('Validating the password.')
@@ -190,7 +202,7 @@ def create_app():
             full_name = '{} {}'.format(user['firstname'], user['lastname'])
             exp_time = datetime.utcnow() + timedelta(seconds=app.config['EXPIRY_SECONDS'])
             payload = {
-                'user': username,
+                'user': email,
                 'acct': user['accountid'],
                 'name': full_name,
                 'iat': datetime.utcnow(),

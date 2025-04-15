@@ -44,6 +44,7 @@ class UserDb:
             Column('state', String, nullable=False),
             Column('zip', String, nullable=False),
             Column('ssn', String, nullable=False),
+            Column('email', String, unique=True, nullable=False),  # Add email column
         )
 
         # Set up tracing autoinstrumentation for sqlalchemy
@@ -56,7 +57,7 @@ class UserDb:
         """Add a user to the database.
 
         Params: user - a key/value dict of attributes describing a new user
-                    {'username': username, 'password': password, ...}
+                    {'username': username, 'password': password, 'email': email, ...}
         Raises: SQLAlchemyError if there was an issue with the database
         """
         statement = self.users_table.insert().values(user)
@@ -89,7 +90,7 @@ class UserDb:
 
         Params: username - the username of the user
         Return: a key/value dict of user attributes,
-                {'username': username, 'accountid': accountid, ...}
+                {'username': username, 'accountid': accountid, 'email': email, ...}
                 or None if that user does not exist
         Raises: SQLAlchemyError if there was an issue with the database
         """
@@ -98,4 +99,34 @@ class UserDb:
         with self.engine.connect() as conn:
             result = conn.execute(statement).first()
         self.logger.debug('RESULT: fetched user data for %s', username)
+        return dict(result) if result is not None else None
+    
+    def email_exists(self, email):
+        """Check if an email exists in the database.
+
+        Params: email - the email to check
+        Return: True if the email exists, False otherwise
+        Raises: SQLAlchemyError if there was an issue with the database
+        """
+        statement = self.users_table.select().where(self.users_table.c.email == email)
+        self.logger.debug('QUERY: %s', str(statement))
+        with self.engine.connect() as conn:
+            result = conn.execute(statement).first()
+        self.logger.debug('RESULT: email %s exists: %s', email, result is not None)
+        return result is not None
+
+    def get_user_by_email(self, email):
+        """Get user data for the specified email.
+
+        Params: email - the email of the user
+        Return: a key/value dict of user attributes,
+                {'username': username, 'accountid': accountid, 'email': email, ...}
+                or None if that user does not exist
+        Raises: SQLAlchemyError if there was an issue with the database
+        """
+        statement = self.users_table.select().where(self.users_table.c.email == email)
+        self.logger.debug('QUERY: %s', str(statement))
+        with self.engine.connect() as conn:
+            result = conn.execute(statement).first()
+        self.logger.debug('RESULT: fetched user data for %s', email)
         return dict(result) if result is not None else None
