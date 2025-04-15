@@ -184,15 +184,15 @@ def create_app():
         - password
         """
         app.logger.debug('Sanitizing login input.')
-        email = bleach.clean(request.args.get('email'))
+        username = bleach.clean(request.args.get('username'))
         password = bleach.clean(request.args.get('password'))
 
         # Get user data
         try:
             app.logger.debug('Getting the user data.')
-            user = users_db.get_user_by_email(email)
+            user = users_db.get_user(username)
             if user is None:
-                raise LookupError('user with email {} does not exist'.format(email))
+                raise LookupError('user  {} does not exist'.format())
 
             # Validate the password
             app.logger.debug('Validating the password.')
@@ -202,7 +202,7 @@ def create_app():
             full_name = '{} {}'.format(user['firstname'], user['lastname'])
             exp_time = datetime.utcnow() + timedelta(seconds=app.config['EXPIRY_SECONDS'])
             payload = {
-                'user': email,
+                'user': username,
                 'acct': user['accountid'],
                 'name': full_name,
                 'iat': datetime.utcnow(),
