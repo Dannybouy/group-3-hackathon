@@ -40,6 +40,20 @@ limitations under the License.
                     <h4 class="mb-4">Account Information</h4>
                     <div id="alertBanner" class="alert alert-danger mb-4 hidden" role="alert">
                       <span class="alert-icon mr-2 material-icons error-icon">error</span>Passwords don't match. Please try again.
+
+                      <!-- Email Field -->
+                    <div class="mb-5">
+                        <label class="text-uppercase text-muted secondary-text" for="email">Email</label>
+                        <div class="input-group mt-2 mb-5">
+                          <div class="input-group-prepend mr-2">
+                            <span class="input-group-text"><span class="material-icons">email</span></span>
+                          </div>
+                          <input class="form-control" type="email" id="signup-email" name="email" autocomplete="off" required>
+                          <div class="invalid-feedback">
+                            Please enter a valid email address.
+                          </div>
+                        </div>
+                    </div>
                     </div>
                     <div class="mb-5">
                       <label class="text-uppercase text-muted secondary-text" for="username">Username</label>
