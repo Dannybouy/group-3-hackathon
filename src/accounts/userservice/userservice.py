@@ -22,6 +22,9 @@ import logging
 import os
 import sys
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 import bcrypt
 import jwt
@@ -49,6 +52,115 @@ def create_app():
     # as pylint thinks they are unused
     # pylint: disable=unused-variable
 
+    def send_welcome_email(username, email, firstname):
+        """
+        Send a welcome email to a newly registered user
+        
+        Args:
+            username: User's username
+            email: User's email address
+            firstname: User's first name
+        """
+        try:
+            # Get email configuration from environment variables
+            mail_server = os.environ.get('MAIL_SERVER')
+            mail_port = int(os.environ.get('MAIL_PORT'))
+            mail_sender = os.environ.get('MAIL_DEFAULT_SENDER')
+            mail_password = os.environ.get('EMAIL_PASSWORD')
+            use_tls = os.environ.get('MAIL_USE_TLS', 'false').lower() == 'true'
+            
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = mail_sender
+            msg['To'] = email
+            msg['Subject'] = f"Welcome to Our Group 3 Banking, {firstname}!"
+            
+            # Create styled email body with CSS
+            body = f"""
+            <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333333;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        border: 1px solid #dddddd;
+                        border-radius: 5px;
+                    }}
+                    .header {{
+                        background-color: #4285f4;
+                        color: white;
+                        padding: 15px;
+                        text-align: center;
+                        border-radius: 5px 5px 0 0;
+                    }}
+                    .content {{
+                        padding: 20px;
+                    }}
+                    .footer {{
+                        background-color: #f5f5f5;
+                        padding: 10px;
+                        text-align: center;
+                        font-size: 12px;
+                        border-radius: 0 0 5px 5px;
+                    }}
+                    .highlight {{
+                        font-weight: bold;
+                        color: #4285f4;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2>Welcome to Our Group 3 Banking Service!</h2>
+                    </div>
+                    <div class="content">
+                        <p>Hello <span class="highlight">{firstname}</span>,</p>
+                        
+                        <p>Thank you for registering with our service. Your account has been successfully created and is now ready to use.</p>
+                        
+                        <p>Your username: <span class="highlight">{username}</span></p>
+                        
+                        <p>You can now log in using your credentials to access all our features and services.</p>
+                        
+                        <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+                        
+                        <p>Best regards,<br>The Service Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>This is an automated message. Please do not reply to this email.</p>
+                        <p>&copy; 2025 Our Service. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Attach the body to the message
+            msg.attach(MIMEText(body, 'html'))
+            
+            # Connect to the SMTP server
+            server = smtplib.SMTP(mail_server, mail_port)
+            if use_tls:
+                server.starttls()
+            
+            # Login and send email
+            server.login(mail_sender, mail_password)
+            server.send_message(msg)
+            server.quit()
+            
+            app.logger.info(f"Welcome email sent successfully to {email}")
+            return True
+        except Exception as e:
+            app.logger.error(f"Failed to send welcome email: {str(e)}")
+            return False
+
     @app.route('/version', methods=['GET'])
     def version():
         """
@@ -62,6 +174,8 @@ def create_app():
         Readiness probe
         """
         return 'ok', 200
+
+
 
     @app.route('/users', methods=['POST'])
     def create_user():
@@ -126,6 +240,16 @@ def create_app():
             users_db.add_user(user_data)
             app.logger.info("Successfully created user.")
 
+            # Send welcome email
+            app.logger.debug("Sending welcome email")
+            email_sent = send_welcome_email(
+                username=req['username'],
+                email=req['email'],
+                firstname=req['firstname']
+            )
+            if not email_sent:
+                app.logger.warning(f"Failed to send welcome email to {req['email']}")
+
         except UserWarning as warn:
             app.logger.error("Error creating new user: %s", str(warn))
             return str(warn), 400
@@ -180,19 +304,19 @@ def create_app():
         token expiry time determined by environment variable
 
         request fields:
-        - email
+        - username
         - password
         """
         app.logger.debug('Sanitizing login input.')
-        email = bleach.clean(request.args.get('email'))
+        username = bleach.clean(request.args.get('username'))
         password = bleach.clean(request.args.get('password'))
 
         # Get user data
         try:
             app.logger.debug('Getting the user data.')
-            user = users_db.get_user_by_email(email)
+            user = users_db.get_user(username)
             if user is None:
-                raise LookupError('user with email {} does not exist'.format(email))
+                raise LookupError('user  {} does not exist'.format())
 
             # Validate the password
             app.logger.debug('Validating the password.')
@@ -202,7 +326,7 @@ def create_app():
             full_name = '{} {}'.format(user['firstname'], user['lastname'])
             exp_time = datetime.utcnow() + timedelta(seconds=app.config['EXPIRY_SECONDS'])
             payload = {
-                'user': email,
+                'user': username,
                 'acct': user['accountid'],
                 'name': full_name,
                 'iat': datetime.utcnow(),

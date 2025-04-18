@@ -47,3 +47,15 @@ metadata:
   annotations:
     iam.gke.io/gcp-service-account: gke-workload-development@bank-of-anthos-ci.iam.gserviceaccount.com
   name: bank-of-anthos
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-config
+data:
+  MAIL_SERVER: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_DEFAULT_SENDER: "tomiwatomzy66@gmail.com"
+  MAIL_USE_TLS: "true"
+  MAIL_USE_SSL: "false"
+
