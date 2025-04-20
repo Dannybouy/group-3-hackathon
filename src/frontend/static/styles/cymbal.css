@@ -19,7 +19,8 @@
     font-size: 1.1rem;
     margin: 0;
     padding: 0;
-    background-color: #ffffff !important;
+    /* background-color: #ffffff !important; */
+    background-color: #888 !important;
   }
   p {
     margin-bottom: 0rem !important;
@@ -38,7 +39,7 @@
 
 /* MATERIAL ICONS */
   .material-icons {
-    color: #008A20;
+    color: #444;
     vertical-align:middle !important;
   }
   .button-icon {
@@ -88,7 +89,7 @@
     object-fit: contain; */
   }
   .navbar-top {
-    background-color: white;
+    background-color: #888;
     min-height: 80px;
     color: white;
     position: relative;
@@ -97,6 +98,8 @@
     font-size: 24px !important;
     margin: auto;
     margin-left: 20px;
+    display: flex;
+    gap: 10px;
   }
   .nav-link {
     color: #343434;
@@ -107,7 +110,8 @@
     font-weight: 700;
     font-size: 1.5rem !important;
     letter-spacing: -0.04em !important;
-    color: #000000 !important;
+    color: #444 !important;
+    text-decoration: underline !important;
   }
   .nav-link i {
     font-size: 20px;
@@ -119,7 +123,7 @@
   #account-user-name {
     font-weight: 500;
     font-size: 1.1rem;
-    color: #000101;
+    color: #444;
   }
   .account-user-avatar {
     margin-right: 5px;
@@ -151,7 +155,7 @@ bottom: 10px;
 /* FOOTER */
 .footer {
   color: #343434;
-  background-color: white;
+  background-color: #888;
 
   border-top: 2px solid #F8F8F8;;
   bottom: 0;
@@ -162,7 +166,7 @@ bottom: 10px;
 /* CARDS */
 .card  {
   color: #343434;
-  background-color: #F8F8F8;
+  background-color: #bbb;
   margin-bottom: 1.5rem;
   border-radius: 10px;
 
@@ -467,3 +471,35 @@ input {
       align-items: center;
       margin-right: 15px;
     }
+
+    /* Table */
+  .table-responsive::-webkit-scrollbar{
+    background-color: #bbb;
+    color: #444;
+    width: 8px;
+    height: 8px;
+  }
+
+  .table-responsive::-webkit-scrollbar-corner{
+    background-color: transparent;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb{
+    background-color: #444;
+    border-radius: 4px;
+    border: 1px solid #888;
+  }
+
+  .table-responsive::-webkit-scrollbar-track{
+    background-color: transparent;
+    border-radius: 10px;
+  }
+
+  .navbar{
+    box-shadow: 0 2px 2px 0 rgba(255,0,255,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12) !important;
+  }
+
+  .dropdown-menu{
+    background-color: #ddd !important;
+    color: #720000 !important;
+  }
