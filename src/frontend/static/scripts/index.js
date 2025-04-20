@@ -70,6 +70,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
     RefreshModals();
   });
 
+  // Added the Generate Statement Logic
+  document.getElementById("generate").addEventListener("click", function(e){
+    e.preventDefault();
+    document.querySelector('#transaction-table').style.setProperty('height', '100%', 'important');
+    const element = document.getElementById('content');
+    const options = {
+    margin: 0.1,
+    filename: 'Bank Statement',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 1 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+
+    html2pdf().set(options).from(element).save().then(function(){
+    document.querySelector('#transaction-table').style.setProperty('height', '500px', 'important');
+    })
+})
+
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
