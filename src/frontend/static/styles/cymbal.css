@@ -109,7 +109,6 @@
     font-size: 1.5rem !important;
     letter-spacing: -0.04em !important;
     color: #008A20 !important;
-    text-decoration: underline !important;
   }
   .nav-link i {
     font-size: 20px;
@@ -203,6 +202,7 @@ bottom: 10px;
   font-weight: 200;
   vertical-align: middle !important;
   display: inline-block !important;
+  color: #444 !important;
 }
 
 
@@ -534,3 +534,15 @@ input {
     background-color: #ddd !important;
     color: #720000 !important;
   }
+
+  .ttest {
+    width: 100%;
+}
+
+#mode{
+  cursor: pointer;
+}
+
+.in{
+  margin-right: 20px;
+}
