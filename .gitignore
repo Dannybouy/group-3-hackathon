@@ -211,3 +211,7 @@ venv-*
 
 # go for ci
 go/
+
+# project directory
+all_files.txt
+directory_structure.txt
