@@ -74,6 +74,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.getElementById("generate").addEventListener("click", function(e){
     e.preventDefault();
     document.querySelector('#transaction-table').style.setProperty('height', '100%', 'important');
+    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'none', 'important');
+    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'none', 'important');
+    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'none', 'important');
     const element = document.getElementById('content');
     const options = {
     margin: 0.1,
@@ -86,33 +89,50 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     html2pdf().set(options).from(element).save().then(function(){
     document.querySelector('#transaction-table').style.setProperty('height', '500px', 'important');
+    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'block', 'important');
+    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'block', 'important');
+    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'block', 'important');
     })
 })
 
   //Added the toggle Button Logic
   let body = document.querySelector('body');
-  let card = document.querySelectorAll('.cardc');
+  let card = document.querySelectorAll('.cardc, .in');
+  let cardheading = document.querySelectorAll('.text-transaction-header')
   let nav = document.querySelector('.navbar-top');
   let foot = document.querySelector('.footer');
+  let headings = document.querySelectorAll('.text-muted, .header-title, .account-number, #account-user-name, .card-header-title, .sign-in input')
   document.getElementById("mode").addEventListener("click", function(e){
       e.preventDefault();
       if(this.innerText === "light_mode"){
           body.style.setProperty("background-color", "#fff", "important");
-          nav.style.setProperty("background-color", "#fff", "important");
-          foot.style.setProperty("background-color", "#fff", "important");
-          card[0].style.setProperty("background-color", "#F8F8F8", "important");
-          card[1].style.setProperty("background-color", "#F8F8F8", "important");
+          body.style.setProperty("color", "#333", "important");
+          nav?.style.setProperty("background-color", "#fff", "important");
+          foot?.style.setProperty("background-color", "#fff", "important");
+          foot?.style.setProperty("color", "#333", "important");
+          card[0]?.style.setProperty("background-color", "#F8F8F8", "important");
+          card[0]?.style.setProperty("color", "#333", "important");
+          card[1]?.style.setProperty("background-color", "#F8F8F8", "important");
+          card[1]?.style.setProperty("color", "#333", "important");
+          cardheading?.forEach(e => e.style.setProperty("color", "#333", "important"))
+          headings?.forEach(e => e.style.setProperty("color", "#333", "important"))
           this.innerText = "dark_mode"
-          console.log("Switching to dark");
+          console.log("Switching to light");
       }
       else if(this.innerText === "dark_mode"){
-          body.style.setProperty("background-color", "#888", "important");
-          nav.style.setProperty("background-color", "#888", "important");
-          foot.style.setProperty("background-color", "#888", "important");
-          card[0].style.setProperty("background-color", "#bbb", "important");
-          card[1].style.setProperty("background-color", "#bbb", "important");
+          body.style.setProperty("background-color", "#111", "important");
+          body.style.setProperty("color", "#fff", "important");
+          nav?.style.setProperty("background-color", "#111", "important");
+          foot?.style.setProperty("background-color", "#111", "important");
+          foot?.style.setProperty("color", "#fff", "important");
+          card[0]?.style.setProperty("background-color", "#333", "important");
+          card[0]?.style.setProperty("color", "#fff", "important");
+          card[1]?.style.setProperty("background-color", "#333", "important");
+          card[1]?.style.setProperty("color", "#fff", "important");
+          cardheading?.forEach(e=>e.style.setProperty("color", "#fff", "important"))
+          headings?.forEach(e => e.style.setProperty("color", "#fff", "important"))
           this.innerText = "light_mode"
-          console.log("Switching to Light");
+          console.log("Switching to dark");
       }
   })
 
