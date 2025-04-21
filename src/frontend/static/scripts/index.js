@@ -89,6 +89,33 @@ document.addEventListener("DOMContentLoaded", function(event) {
     })
 })
 
+  //Added the toggle Button Logic
+  let body = document.querySelector('body');
+  let card = document.querySelectorAll('.cardc');
+  let nav = document.querySelector('.navbar-top');
+  let foot = document.querySelector('.footer');
+  document.getElementById("mode").addEventListener("click", function(e){
+      e.preventDefault();
+      if(this.innerText === "light_mode"){
+          body.style.setProperty("background-color", "#fff", "important");
+          nav.style.setProperty("background-color", "#fff", "important");
+          foot.style.setProperty("background-color", "#fff", "important");
+          card[0].style.setProperty("background-color", "#F8F8F8", "important");
+          card[1].style.setProperty("background-color", "#F8F8F8", "important");
+          this.innerText = "dark_mode"
+          console.log("Switching to dark");
+      }
+      else if(this.innerText === "dark_mode"){
+          body.style.setProperty("background-color", "#888", "important");
+          nav.style.setProperty("background-color", "#888", "important");
+          foot.style.setProperty("background-color", "#888", "important");
+          card[0].style.setProperty("background-color", "#bbb", "important");
+          card[1].style.setProperty("background-color", "#bbb", "important");
+          this.innerText = "light_mode"
+          console.log("Switching to Light");
+      }
+  })
+
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
