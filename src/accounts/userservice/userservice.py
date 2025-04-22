@@ -316,7 +316,7 @@ def create_app():
             app.logger.debug('Getting the user data.')
             user = users_db.get_user(username)
             if user is None:
-                raise LookupError('user  {} does not exist'.format())
+                raise LookupError('user {} does not exist'.format(username))
 
             # Validate the password
             app.logger.debug('Validating the password.')
