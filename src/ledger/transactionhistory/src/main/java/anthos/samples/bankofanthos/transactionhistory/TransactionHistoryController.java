@@ -24,17 +24,20 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import io.micrometer.stackdriver.StackdriverMeterRegistry;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Deque;
 import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,6 +60,7 @@ public final class TransactionHistoryController {
     @Value("${HISTORY_LIMIT:100}")
     private Integer historyLimit;
     private String version;
+    private String localRoutingNum;
 
     private JWTVerifier verifier;
     private LedgerReader ledgerReader;
@@ -76,6 +80,7 @@ public final class TransactionHistoryController {
             @Value("${LOCAL_ROUTING_NUM}") final String localRoutingNum,
             @Value("${VERSION}") final String version) {
         this.version = version;
+        this.localRoutingNum = localRoutingNum;
         // Initialize JWT verifier.
         this.verifier = verifier;
         // Initialize cache
@@ -207,4 +212,57 @@ public final class TransactionHistoryController {
                                               HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Autowired
+    private StatementService statementService;
+
+    @GetMapping("/statement/{accountId}")
+    public ResponseEntity<?> generateStatement(
+        @RequestHeader("Authorization") String bearerToken,
+        @PathVariable String accountId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate
+        //@RequestParam String localRoutingNum //local routing number
+        ) 
+                {
+                    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+                        bearerToken = bearerToken.split("Bearer ")[1];
+                    }
+        
+                    try {
+                        // Check that the bearer token is valid
+                        DecodedJWT jwt = verifier.verify(bearerToken);
+        
+                        // Check that the authenticated user can access this account
+                        if (!accountId.equals(jwt.getClaim("acct").asString())) {
+                            LOGGER.error("Failed to generate statement: "
+                                + "not authorized");
+                            return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
+                        }
+        
+                        // Validate the dates
+                        if(startDate.after(endDate)) {
+                            LOGGER.error("Start date cannot be after end date");
+                            return new ResponseEntity<>("Start date must be before end date", HttpStatus.BAD_REQUEST);
+                        }
+        
+                        // Generate the statement
+                        BankStatement statement = statementService.generateStatement(accountId, localRoutingNum, startDate, endDate);
+
+                return new ResponseEntity<>(statement, HttpStatus.OK);
+
+            } catch (JWTVerificationException e) {
+                LOGGER.error("Failed to generate statement: not authorized");
+                return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Failed to generate statement: invalid date range");
+                return new ResponseEntity<>("Invalid date range", HttpStatus.BAD_REQUEST);
+            } catch (Exception e) {
+                LOGGER.error("Failed to generate statement: " + e.getMessage());
+                return new ResponseEntity<>("Failed to generate statement", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        }
 }
+
+//eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdHVzZXIiLCJhY2N0IjoiMTAxMTIyNjExMSIsIm5hbWUiOiJUZXN0IFVzZXIiLCJpYXQiOjE3NDUwNjU4NjgsImV4cCI6MTc0NTA2OTQ2OH0.ou7i3FAiH3w2OGUeUF3YJdu5x6BUrfziDQJo9nxqntJU_wEM3Res6uS4A7V6x5jQTRuYOd__Ma4NH_ho1kefPCxWdVI_XKB7mfWvcVWa6sdBOEzfd8mHTkvmMEehuCFAOPOtwU6MoLSWjghUzuNjCcP2_EoK8xUhsgp_SRQhjMpt8Y-8UxBvdfRz9nLByuPcOKhHfMDnPoodw-iTibYwmSZlMMSXO6pnsEtr3XplRLYMBK_r9KilZ181fqpHWOrM9wWXAwVaCye4s4jb8tDQqrZzyS8UdLRXNCnyqf285mwy34D5sHeX36u51Yl-OtZL9pWQz-3gfprOkflhwwi_tNbp_fNEzOjVVkG4voLG8cWRiE-_g8d8dTmsC_5-1E_zCX7XuZ5bYLEsI80Sqr7Q-SK1tRpZDkagc1z8Q4FSjoeWi6yLDC-Gdk1U8VFFj9inzmfLa8qEcqEvqzwJgvzeg1EJ0CYFQMR0ZK9Z8CCwOzFMvsBPzEIKiK1AiDxDbulQezlO9kVFIk7JCbwI4wd7tJW_qY3uCkdUCd52rtIktYZjsJTc7L2bv34jng_2vPiVwJVFk61yTKiueiNQXKYokco2OCLdykChO7W4i5Vy9b7Pft-M7Sn1kZoYWZWSuHNFurChZ0s8daw5L1cre0d4o6HIKETKzwrUweh7SV0ZXag
