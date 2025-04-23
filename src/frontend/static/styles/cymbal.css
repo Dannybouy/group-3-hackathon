@@ -506,7 +506,7 @@ input {
 }
 
   .table-responsive::-webkit-scrollbar{
-    background-color: #bbb;
+    background-color: transparent;
     color: #444;
     width: 8px;
     height: 8px;
