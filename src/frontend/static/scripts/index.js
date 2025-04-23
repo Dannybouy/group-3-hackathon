@@ -70,6 +70,89 @@ document.addEventListener("DOMContentLoaded", function(event) {
     RefreshModals();
   });
 
+  // Added the Generate Statement Logic
+  document.getElementById("generate").addEventListener("click", function(e){
+    e.preventDefault();
+    document.querySelector('#transaction-table').style.setProperty('height', '100%', 'important');
+    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'none', 'important');
+    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'none', 'important');
+    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'none', 'important');
+    const element = document.getElementById('content');
+    const options = {
+    margin: 0.1,
+    filename: 'Bank Statement',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 1 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+
+    html2pdf().set(options).from(element).save().then(function(){
+    document.querySelector('#transaction-table').style.setProperty('height', '500px', 'important');
+    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'block', 'important');
+    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'block', 'important');
+    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'block', 'important');
+    })
+})
+
+  //Added the toggle Button Logic
+  if (!localStorage.getItem("mode")) {
+    localStorage.setItem("mode", "light_mode");
+  }
+  let body = document.querySelector('body');
+  let card = document.querySelectorAll('.cardc, .in');
+  let cardheading = document.querySelectorAll('.text-transaction-header')
+  let nav = document.querySelector('.navbar-top');
+  let foot = document.querySelector('.footer');
+  let headings = document.querySelectorAll('.text-muted, .header-title, .account-number, #account-user-name, .card-header-title, .sign-in input')
+  let td = document.querySelectorAll('td');
+  let debit = document.querySelectorAll(".transaction-amount-debit")
+  let credit = document.querySelectorAll(".transaction-amount-credit")
+  let mode = document.getElementById('mode');
+  const modeChange = function(){
+    if(mode.innerText === "light_mode"){
+        body.style.setProperty("background-color", "#fff", "important");
+        body.style.setProperty("color", "#333", "important");
+        nav?.style.setProperty("background-color", "#fff", "important");
+        foot?.style.setProperty("background-color", "#fff", "important");
+        foot?.style.setProperty("color", "#333", "important");
+        card[0]?.style.setProperty("background-color", "#F8F8F8", "important");
+        card[0]?.style.setProperty("color", "#333", "important");
+        card[1]?.style.setProperty("background-color", "#F8F8F8", "important");
+        card[1]?.style.setProperty("color", "#333", "important");
+        td?.forEach(e => e.style.setProperty("color", "#333"));
+        cardheading?.forEach(e => e.style.setProperty("color", "#333", "important"))
+        headings?.forEach(e => e.style.setProperty("color", "#333", "important"))
+        credit?.forEach(e => e.style.setProperty("color", "#008A20", "important")) 
+        debit?.forEach(e => e.style.setProperty("color", "#FF0000", "important")) 
+        mode.innerText = "dark_mode"
+        localStorage.setItem('mode', "light_mode")
+        console.log("Switching to light");
+    }
+    else if(mode.innerText === "dark_mode"){
+        body.style.setProperty("background-color", "#111", "important");
+        body.style.setProperty("color", "#fff", "important");
+        nav?.style.setProperty("background-color", "#111", "important");
+        foot?.style.setProperty("background-color", "#111", "important");
+        foot?.style.setProperty("color", "#fff", "important");
+        card[0]?.style.setProperty("background-color", "#333", "important");
+        card[0]?.style.setProperty("color", "#fff", "important");
+        card[1]?.style.setProperty("background-color", "#333", "important");
+        card[1]?.style.setProperty("color", "#fff", "important");
+        td.forEach(e => e.style.setProperty("color", "#fff"));
+        cardheading?.forEach(e=>e.style.setProperty("color", "#fff", "important"))
+        headings?.forEach(e => e.style.setProperty("color", "#fff", "important"))
+        credit?.forEach(e => e.style.setProperty("color", "#008A20", "important"))
+        debit?.forEach(e => e.style.setProperty("color", "#FF0000", "important"))
+        mode.innerText = "light_mode"
+        localStorage.setItem('mode', "dark_mode")
+        console.log("Switching to dark");
+    }
+  }
+  mode.innerText = localStorage.getItem('mode');
+  modeChange();
+  document.getElementById("mode").addEventListener("click", modeChange)
+
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

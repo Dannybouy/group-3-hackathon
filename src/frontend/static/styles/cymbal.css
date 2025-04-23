@@ -20,6 +20,7 @@
     margin: 0;
     padding: 0;
     background-color: #ffffff !important;
+    /* background-color: #888 !important; */
   }
   p {
     margin-bottom: 0rem !important;
@@ -34,11 +35,12 @@
   }
   label {
     font-size: 0.9rem;
+    margin-top: 20px;
   }
 
 /* MATERIAL ICONS */
   .material-icons {
-    color: #008A20;
+    color: #444;
     vertical-align:middle !important;
   }
   .button-icon {
@@ -88,15 +90,15 @@
     object-fit: contain; */
   }
   .navbar-top {
-    background-color: white;
+    background-color: #fff;
     min-height: 80px;
     color: white;
     position: relative;
   }
   .nav-item {
     font-size: 24px !important;
-    margin: auto;
-    margin-left: 20px;
+    display: flex;
+    gap: 10px;
   }
   .nav-link {
     color: #343434;
@@ -107,7 +109,7 @@
     font-weight: 700;
     font-size: 1.5rem !important;
     letter-spacing: -0.04em !important;
-    color: #000000 !important;
+    color: #008A20 !important;
   }
   .nav-link i {
     font-size: 20px;
@@ -118,8 +120,8 @@
   }
   #account-user-name {
     font-weight: 500;
-    font-size: 1.1rem;
-    color: #000101;
+    font-size: 1rem;
+    color: #444;
   }
   .account-user-avatar {
     margin-right: 5px;
@@ -151,7 +153,7 @@ bottom: 10px;
 /* FOOTER */
 .footer {
   color: #343434;
-  background-color: white;
+  background-color: #fff;
 
   border-top: 2px solid #F8F8F8;;
   bottom: 0;
@@ -162,7 +164,7 @@ bottom: 10px;
 /* CARDS */
 .card  {
   color: #343434;
-  background-color: #F8F8F8;
+  background-color: #f8f8f8 !important;
   margin-bottom: 1.5rem;
   border-radius: 10px;
 
@@ -201,6 +203,7 @@ bottom: 10px;
   font-weight: 200;
   vertical-align: middle !important;
   display: inline-block !important;
+  color: #444 !important;
 }
 
 
@@ -467,3 +470,80 @@ input {
       align-items: center;
       margin-right: 15px;
     }
+
+    /* Table */
+
+  .bmd-help, .text-muted {
+      color: #444 !important;
+  }
+
+  .material-icons {
+    color: #008A20 !important;
+  }
+
+  .navbar-nav .nav-link {
+    padding: 0px !important;
+}
+
+.navbar-nav .dropdown-menu {
+  position: absolute !important;
+}
+
+.dropdown-menu.show, .open>.dropdown-menu {
+  position: absolute !important;
+}
+
+.table-responsive {
+  height: 500px !important;
+}
+
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col-auto, .col-lg, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-auto, .col-md, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-md-auto, .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-auto {
+  padding-right: 0 !important;
+}
+
+.btn.btn-secondary {
+  background-color: transparent !important;
+}
+
+  .table-responsive::-webkit-scrollbar{
+    background-color: transparent;
+    color: #444;
+    width: 8px;
+    height: 8px;
+  }
+
+  .table-responsive::-webkit-scrollbar-corner{
+    background-color: transparent;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb{
+    background-color: transparent;
+    border-radius: 4px;
+    border: 1px solid #888;
+  }
+
+  .table-responsive::-webkit-scrollbar-track{
+    background-color: transparent;
+    border-radius: 10px;
+  }
+
+  .navbar{
+    box-shadow: 0 2px 2px 0 rgba(255,0,255,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12) !important;
+  }
+
+  .dropdown-menu{
+    background-color: #ddd !important;
+    color: #720000 !important;
+  }
+
+  .ttest {
+    width: 100%;
+}
+
+#mode{
+  cursor: pointer;
+}
+
+.in{
+  margin-right: 20px;
+}
