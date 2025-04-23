@@ -27,13 +27,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   var showAlert = (window.location.search == "?msg=Login+Failed");
   if (showAlert){
-      document.querySelector("#alertBanner").classList.remove("hidden");
+      let err = document.querySelector("#alertBanner");
+      err.classList.remove("hidden");
+      setTimeout(()=>{
+        err.classList.add("hidden");
+      }, 3000);
   }
 
   if (!localStorage.getItem("mode")) {
     localStorage.setItem("mode", "light_mode");
   }
-
   //Added the toggle Button Logic
   let body = document.querySelector('body');
   let card = document.querySelectorAll('.cardc, .in');
