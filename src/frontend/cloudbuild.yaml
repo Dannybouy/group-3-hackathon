@@ -24,6 +24,9 @@ steps:
 
 # 3) auth to your GKE cluster
 - name: gcr.io/cloud-builders/gcloud
+  volumes:
+  - name: kube-config
+    path: /root/.kube
   entrypoint: bash
   args:
     - "-c"
@@ -34,6 +37,11 @@ steps:
 
 # 4) roll out the new image
 - name: gcr.io/cloud-builders/kubectl
+  env:
+    - 'KUBECONFIG=/root/.kube/config'
+  volumes:
+  - name: kube-config
+    path: /root/.kube
   args:
     - set
     - image
@@ -45,3 +53,6 @@ images:
   - "$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/frontend:$SHORT_SHA"
 options:
   logging: CLOUD_LOGGING_ONLY
+volumes:
+- name: kube-config
+  path: /root/.kube
