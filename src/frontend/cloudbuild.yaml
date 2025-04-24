@@ -38,10 +38,8 @@ steps:
 # 4) roll out the new image
 - name: gcr.io/cloud-builders/kubectl
   env:
-    - 'KUBECONFIG=/root/.kube/config'
-  volumes:
-  - name: kube-config
-    path: /root/.kube
+    - 'CLOUDSDK_COMPUTE_REGION=$_REGION'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
   args:
     - set
     - image
