@@ -4,7 +4,7 @@ substitutions:
   _CLUSTER: "bank-of-anthos"
   _DEPLOYMENT: "frontend"
   _NAMESPACE: "default"
-  _CONTAINER_NAME: "frontend"
+  _CONTAINER_NAME: "front"
 
 steps:
 # 1) build & tag
