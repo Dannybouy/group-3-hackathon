@@ -4,6 +4,7 @@ substitutions:
   _CLUSTER: "bank-of-anthos"
   _DEPLOYMENT: "frontend"
   _NAMESPACE: "default"
+  _CONTAINER_NAME: "frontend"
 
 steps:
 # 1) build & tag
@@ -24,9 +25,6 @@ steps:
 
 # 3) auth to your GKE cluster
 - name: gcr.io/cloud-builders/gcloud
-  volumes:
-  - name: kube-config
-    path: /root/.kube
   entrypoint: bash
   args:
     - "-c"
@@ -44,7 +42,7 @@ steps:
     - set
     - image
     - deployment/$_DEPLOYMENT
-    - frontend="$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/frontend:$SHORT_SHA"
+    - $_CONTAINER_NAME="$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/frontend:$SHORT_SHA"
     - --namespace=$_NAMESPACE
 
 images:
