@@ -10,6 +10,7 @@ steps:
     dir: src/ledger/ledgerwriter
     args:
       - '-B'
+      - 'compile' # Add compile goal
       - 'com.google.cloud.tools:jib-maven-plugin:build'
       - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledgerwriter:$SHORT_SHA'
 
@@ -18,6 +19,7 @@ steps:
     dir: src/ledger/balancereader
     args:
       - '-B'
+      - 'compile'
       - 'com.google.cloud.tools:jib-maven-plugin:build'
       - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/balancereader:$SHORT_SHA'
 
@@ -26,6 +28,7 @@ steps:
     dir: src/ledger/transactionhistory
     args:
       - '-B'
+      - 'compile'
       - 'com.google.cloud.tools:jib-maven-plugin:build'
       - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/transactionhistory:$SHORT_SHA'
 
@@ -34,6 +37,7 @@ steps:
     dir: src/ledger/ledger-db
     args:
       - '-B'
+      - 'compile'
       - 'com.google.cloud.tools:jib-maven-plugin:build'
       - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledger-db:$SHORT_SHA'
 
