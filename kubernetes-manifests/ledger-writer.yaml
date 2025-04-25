@@ -87,7 +87,7 @@ spec:
                 name: service-api-config
             - configMapRef:
                 name: ledger-db-config
-          image: PLACEHOLDER_IMAGE
+          image: dreamdev-team3/group3-repo/ledgerwriter:placeholder
           name: ledgerwriter
           readinessProbe:
             httpGet:

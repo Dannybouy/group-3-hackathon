@@ -88,7 +88,7 @@ spec:
                 name: ledger-db-config
             - configMapRef:
                 name: demo-data-config
-          image: PLACEHOLDER_IMAGE
+          image: dreamdev-team3/group3-repo/ledger-db:placeholder
           name: postgres
           ports:
             - containerPort: 5432

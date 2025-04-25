@@ -89,7 +89,7 @@ spec:
                 name: environment-config
             - configMapRef:
                 name: ledger-db-config
-          image: PLACEHOLDER_IMAGE
+          image: dreamdev-team3/group3-repo/balance-reader:placeholder
           livenessProbe:
             httpGet:
               path: /healthy
