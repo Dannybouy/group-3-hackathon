@@ -102,9 +102,11 @@ steps:
       - --namespace=$_NAMESPACE
 
 images:
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledgerwriter:$SHORT_SHA'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/balancereader:$SHORT_SHA'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/transactionhistory:$SHORT_SHA'
+  # Remove Jib-built images as Cloud Build doesn't track their push directly
+  # - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledgerwriter:$SHORT_SHA'
+  # - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/balancereader:$SHORT_SHA'
+  # - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/transactionhistory:$SHORT_SHA'
+  # Keep ledger-db as it's built/pushed by Cloud Build docker steps
   - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledger-db:$SHORT_SHA'
 
 options:
