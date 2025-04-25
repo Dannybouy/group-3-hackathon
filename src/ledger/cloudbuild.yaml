@@ -32,14 +32,20 @@ steps:
       - 'com.google.cloud.tools:jib-maven-plugin:build'
       - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/transactionhistory:$SHORT_SHA'
 
-  # 4) build & push ledger-db
-  - name: gcr.io/cloud-builders/mvn
-    dir: src/ledger/ledger-db
+  # 4a) build ledger-db using Dockerfile
+  - name: gcr.io/cloud-builders/docker
+    dir: src/ledger/ledger-db # Specify the directory containing the Dockerfile
     args:
-      - '-B'
-      - 'compile'
-      - 'com.google.cloud.tools:jib-maven-plugin:build'
-      - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledger-db:$SHORT_SHA'
+      - build
+      - '-t'
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledger-db:$SHORT_SHA'
+      - '.' # Use the current directory as the build context
+
+  # 4b) push ledger-db image
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/ledger-db:$SHORT_SHA'
 
   # 5) auth to GKE cluster
   - name: gcr.io/cloud-builders/gcloud
