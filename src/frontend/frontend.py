@@ -25,12 +25,13 @@ import socket
 from dotenv import load_dotenv
 from decimal import Decimal, DecimalException
 from time import sleep
+from io import BytesIO
 
 import requests
 from requests.exceptions import HTTPError, RequestException
 import jwt
 from flask import Flask, abort, jsonify, make_response, redirect, \
-    render_template, request, url_for, Response
+    render_template, request, url_for, send_file
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -805,13 +806,11 @@ def create_app():
         # 4. Read PDF bytes and set Content‐Disposition so browser downloads a file.
         pdf = resp.content
         filename = f"statement_{account_id}_{start}_to_{end}.pdf"
-        return Response(
-            pdf,
+        return send_file(
+            BytesIO(pdf),
             mimetype='application/pdf',
-            headers={
-                # Instruct browser to download as attachment with this filename.
-              'Content-Disposition': f'attachment; filename="{filename}"'
-            }
+            as_attachment=True,
+            attachment_filename=filename
         )
 
     return app
