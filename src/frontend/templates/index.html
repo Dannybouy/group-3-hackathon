@@ -64,9 +64,10 @@ limitations under the License.
     </div>
 
     <!-- Balance / Deposit / Send Payment row -->
-    <div class="row col-lg-12 align-items-start">
+    <div class="row col-lg-12 align-items-start" id="content">
+      <div class="ttest">
       <div class="col-lg-4">
-          <div class="card">
+          <div class="card cardc">
             <div class="card-body">
               <div class="row align-items-start">
                 <div class="col">
@@ -80,6 +81,7 @@ limitations under the License.
               </div>
             </div>
         </div>
+      </div>
       </div>
 
       <!-- Buttons -->
@@ -115,6 +117,20 @@ limitations under the License.
           </div>
         </div>
       </div>
+      <div class="col-lg-4">
+        <div class="card card-button" id="generate">
+          <div class="card-body">
+            <div class="row align-items-start">
+              <div class="col">
+                <span class="h5 mb-0">Generate Statement</span>
+              </div>
+              <div class="button-icon col-auto">
+                <span class="material-icons" id="deposit-icon">get_app</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Generate Statement Button -->
       <div class="col-lg-4 deposit-send-payment-div">
@@ -137,7 +153,7 @@ limitations under the License.
       <!-- Transaction History Table -->
       <div class="row col-lg-12 mb-4 align-items-start">
         <div class="col-lg-12">
-          <div class="card" class="transaction-card">
+          <div class="card cardc">
             <div class="card-table-header">
               <div class="row align-items-start">
                 <div class="col">
@@ -238,7 +254,7 @@ limitations under the License.
               <div class="modal-body">
                   <div class="row">
                     <div class="col-md-10 offset-md-1 mb-4">
-                      <label class="text-uppercase text-muted secondary-text mb-3" for="accounts">External Account</label>
+                      <label style="color: #444 !important" class="text-uppercase text-muted secondary-text mb-3" for="accounts">External Account</label>
                       <select class="custom-select d-block w-100" id="accounts" name="account">
                         {% for account in contacts %}
                           {% if account.is_external %}
@@ -429,6 +445,7 @@ limitations under the License.
 {% include 'shared/footer.html' %}
 {% include 'shared/scripts.html' %}
     <!-- Page specific-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="static/scripts/index.js"></script>
   </body>
 </html>

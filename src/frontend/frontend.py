@@ -22,6 +22,7 @@ import json
 import logging
 import os
 import socket
+from dotenv import load_dotenv
 from decimal import Decimal, DecimalException
 from time import sleep
 
@@ -44,6 +45,7 @@ from opentelemetry.instrumentation.jinja2 import Jinja2Instrumentor
 # Local imports
 from api_call import ApiCall, ApiRequest
 from traced_thread_pool_executor import TracedThreadPoolExecutor
+
 
 # Local constants
 BALANCE_NAME = "balance"
