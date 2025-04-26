@@ -13,6 +13,9 @@ public class BankStatement {
     @JsonProperty("accountId")
     private String accountId;
 
+    @JsonProperty("userName")
+    private String userName;
+
     @JsonProperty("startDate")
     private Date startDate;
 
@@ -35,8 +38,9 @@ public class BankStatement {
     private Long totalDebits;
 
    // We are creating a constructor for the BankStatement class.
-    public BankStatement(String accountId, Date startDate, Date endDate, Long openingBalance, Long closingBalance, List<Transaction> transactions, Long totalCredits, Long totalDebits) {
+    public BankStatement(String accountId, String userName, Date startDate, Date endDate, Long openingBalance, Long closingBalance, List<Transaction> transactions, Long totalCredits, Long totalDebits) {
         this.accountId = accountId;
+        this.userName = userName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.openingBalance = openingBalance;
@@ -50,6 +54,10 @@ public class BankStatement {
     // We are creating a getter for the BankStatement class.
     public String getAccountId() {
         return accountId;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public Date getStartDate() {

@@ -98,4 +98,68 @@ document.addEventListener("DOMContentLoaded", function(event) {
       document.querySelector("#deposit-uuid").value = uuidv4();
   }
   RefreshModals();
+
+  // --- Generate PDF Statement Logic ---
+  const generatePdfButton = document.getElementById('generatePdfButton');
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput = document.getElementById('endDate');
+  const dateError = document.getElementById('dateError');
+  const accountId = document.querySelector('.account-number').textContent; // Get account ID from page
+
+  if (generatePdfButton) {
+    generatePdfButton.addEventListener('click', function() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      let isValid = true;
+
+      // Basic validation
+      startDateInput.classList.remove('is-invalid');
+      endDateInput.classList.remove('is-invalid');
+      dateError.classList.add('hidden');
+
+      if (!startDate) {
+        startDateInput.classList.add('is-invalid');
+        isValid = false;
+      }
+      if (!endDate) {
+        endDateInput.classList.add('is-invalid');
+        isValid = false;
+      }
+
+      if (startDate && endDate && startDate > endDate) {
+        endDateInput.classList.add('is-invalid');
+        dateError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (isValid) {
+        // Construct URL and trigger download
+        const pdfUrl = `/statement/${accountId}/pdf?startDate=${startDate}&endDate=${endDate}`;
+        console.log(`Generating PDF from: ${pdfUrl}`);
+        window.location.href = pdfUrl;
+
+        // Close the modal (optional)
+        $('#statementModal').modal('hide');
+
+        // Reset modal fields after generation
+        startDateInput.value = '';
+        endDateInput.value = '';
+        startDateInput.classList.remove('is-invalid');
+        endDateInput.classList.remove('is-invalid');
+        dateError.classList.add('hidden');
+
+      }
+    });
+  }
+
+  // Reset statement modal validation on close
+  $('#statementModal').on('hidden.bs.modal', function (e) {
+      startDateInput.value = '';
+      endDateInput.value = '';
+      startDateInput.classList.remove('is-invalid');
+      endDateInput.classList.remove('is-invalid');
+      dateError.classList.add('hidden');
+  })
+  // --- End Generate PDF Statement Logic ---
+
 });
