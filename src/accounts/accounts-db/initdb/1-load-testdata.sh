@@ -35,7 +35,7 @@ add_user() {
   # Usage:  add_user "ACCOUNTID" "USERNAME" "FIRST_NAME" "EMAIL"
   echo "adding user: $2 with email: $4"
   psql -X -v ON_ERROR_STOP=1 -v account="$1" -v username="$2" -v firstname="$3" -v email="$4" -v passhash="$DEFAULT_PASSHASH" --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    INSERT INTO users VALUES (:'account', :'username', :'passhash', :'firstname', 'User', '2000-01-01', '-5', 'Bowling Green, New York City', 'NY', '10004', '111-22-3333' : 'email') ON CONFLICT DO NOTHING;
+    INSERT INTO users VALUES (:'account', :'username', :'passhash', :'firstname', 'User', '2000-01-01', '-5', 'Bowling Green, New York City', 'NY', '10004', '111-22-3333', : 'email') ON CONFLICT DO NOTHING;
 EOSQL
 }
 
