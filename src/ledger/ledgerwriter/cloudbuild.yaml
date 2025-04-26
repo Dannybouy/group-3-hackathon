@@ -1,0 +1,47 @@
+substitutions:
+  _REGION: 'us-central1'
+  _REPO: 'ledger-repo'
+  _CLUSTER: 'bank-of-anthos'
+  _NAMESPACE: 'default'
+  _SERVICE_NAME: 'ledgerwriter'
+  _CONTAINER_NAME: 'ledgerwriter'
+
+steps:
+  # 1) build & push ledgerwriter using Jib
+  - name: gcr.io/cloud-builders/mvn
+    # Run Maven from the directory containing this cloudbuild.yaml
+    dir: 'src/ledger/ledgerwriter'
+    args:
+      - '-B'
+      - 'compile'
+      - 'com.google.cloud.tools:jib-maven-plugin:build'
+      - '-Dimage=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_SERVICE_NAME:$SHORT_SHA'
+
+  # 2) auth to GKE cluster
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud container clusters get-credentials $_CLUSTER \
+          --region $_REGION \
+          --project $PROJECT_ID
+
+  # 3) roll out new image
+  - name: gcr.io/cloud-builders/kubectl
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=$_REGION'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
+    args:
+      - set
+      - image
+      - deployment/$_SERVICE_NAME
+      - $_CONTAINER_NAME=$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_SERVICE_NAME:$SHORT_SHA
+      - --namespace=$_NAMESPACE
+
+# Jib handles the push, so the image isn't listed here for Cloud Build tracking.
+# images:
+#   - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO/$_SERVICE_NAME:$SHORT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
