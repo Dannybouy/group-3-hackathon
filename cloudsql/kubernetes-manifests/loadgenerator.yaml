@@ -33,7 +33,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: loadgenerator
-        image: gcr.io/bank-of-anthos-ci/loadgenerator:v0.5.11@sha256:7fa44f9bfefd29eacfd62fed4308b8b057cf454ec1f423106303294e6b2d90e4
+        image: us-central1-docker.pkg.dev/dreamdev-team3/loadgenerator-repo/loadgenerator@sha256:d9b94839ef47fc7e8e90bbd139152400e188add918476e09104f589005276867
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

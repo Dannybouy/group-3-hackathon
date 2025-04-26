@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: contacts
-        image: gcr.io/bank-of-anthos-ci/contacts:v0.5.11@sha256:0648c1d1222813f19e641b0070b697597abdbbfbd24a5da1708ebb2796553df0
+        image: us-central1-docker.pkg.dev/dreamdev-team3/accounts-repo/contacts:bd02e26
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
