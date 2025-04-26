@@ -136,7 +136,7 @@ def create_app():
                     logger=app.logger),
             # get statement
             ApiCall(display_name=STATEMENT_LIST_NAME,
-                    api_request=ApiRequest(url=f'{app.config["STATEMENT_URI"]}/{account_id}',
+                    api_request=ApiRequest(url=f'{app.config["STATEMENT_URI"]}/{account_id}/pdf',
                                            headers=hed,
                                            timeout=app.config['BACKEND_TIMEOUT']),
                     logger=app.logger)
