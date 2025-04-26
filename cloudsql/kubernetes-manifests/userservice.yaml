@@ -62,6 +62,11 @@ spec:
             name: environment-config
         - configMapRef:
             name: accounts-db-config
+        - configMapRef:
+                name: email-config
+        - secretRef:
+                name: email-credentials
+                optional: false
         readinessProbe:
           httpGet:
             path: /ready

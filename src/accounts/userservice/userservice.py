@@ -64,7 +64,7 @@ def create_app():
         try:
             # Get email configuration from environment variables
             mail_server = os.environ.get('MAIL_SERVER')
-            mail_port = int(os.environ.get('MAIL_PORT'))
+            mail_port = int(os.environ.get('MAIL_PORT', '587'))
             mail_sender = os.environ.get('MAIL_DEFAULT_SENDER')
             mail_password = os.environ.get('EMAIL_PASSWORD')
             use_tls = os.environ.get('MAIL_USE_TLS', 'false').lower() == 'true'
