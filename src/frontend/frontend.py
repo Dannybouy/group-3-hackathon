@@ -30,7 +30,7 @@ import requests
 from requests.exceptions import HTTPError, RequestException
 import jwt
 from flask import Flask, abort, jsonify, make_response, redirect, \
-    render_template, request, url_for
+    render_template, request, url_for, Response
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -56,9 +56,6 @@ STATEMENT_LIST_NAME = "statement_list"
 # pylint: disable-msg=too-many-locals
 # pylint: disable-msg=too-many-branches
 def create_app():
-    """Flask application factory to create instances
-    of the Frontend Flask App
-    """
     app = Flask(__name__)
 
     # Disabling unused-variable for lines with route decorated functions
@@ -772,6 +769,42 @@ def create_app():
                 platform_display_name = "On-Premises"
     else:
         app.logger.info("ENV_PLATFORM environment variable is not set")
+
+    @app.route('/statement/<account_id>', methods=['GET'])
+    def fetch_statement_pdf(account_id):
+        # New endpoint to handle the form GET from index.html for PDF generation.
+        # 1. Extract JWT from cookie and verify user is authenticated.
+        token = request.cookies.get(app.config['TOKEN_NAME'])
+        if not verify_token(token):
+            # If token invalid or missing, return HTTP 401.
+            return abort(401)
+        # 2. Read start/end dates supplied by the form query params.
+        start = request.args.get('startDate')
+        end   = request.args.get('endDate')
+        # 3. Proxy the request to the backend statement service with auth header.
+        hed = {'Authorization': f'Bearer {token}'}
+        resp = requests.get(
+            f"{app.config['STATEMENT_URI']}/{account_id}",
+            headers=hed,
+            params={'startDate': start, 'endDate': end},
+            timeout=app.config['BACKEND_TIMEOUT']
+        )
+        try:
+            resp.raise_for_status()
+        except HTTPError:
+            # If backend returns error, propagate status code.
+            return abort(resp.status_code)
+        # 4. Read PDF bytes and set Content‐Disposition so browser downloads a file.
+        pdf = resp.content
+        filename = f"statement_{account_id}_{start}_to_{end}.pdf"
+        return Response(
+            pdf,
+            mimetype='application/pdf',
+            headers={
+                # Instruct browser to download as attachment with this filename.
+              'Content-Disposition': f'attachment; filename="{filename}"'
+            }
+        )
 
     return app
 
