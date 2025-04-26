@@ -51,6 +51,7 @@ from traced_thread_pool_executor import TracedThreadPoolExecutor
 BALANCE_NAME = "balance"
 CONTACTS_NAME = "contacts"
 TRANSACTION_LIST_NAME = "transaction_list"
+STATEMENT_LIST_NAME = "statement_list"
 
 # pylint: disable-msg=too-many-locals
 # pylint: disable-msg=too-many-branches
@@ -130,6 +131,12 @@ def create_app():
             # get contacts
             ApiCall(display_name=CONTACTS_NAME,
                     api_request=ApiRequest(url=f'{app.config["CONTACTS_URI"]}/{username}',
+                                           headers=hed,
+                                           timeout=app.config['BACKEND_TIMEOUT']),
+                    logger=app.logger),
+            # get statement
+            ApiCall(display_name=STATEMENT_LIST_NAME,
+                    api_request=ApiRequest(url=f'{app.config["STATEMENT_URI"]}/{account_id}',
                                            headers=hed,
                                            timeout=app.config['BACKEND_TIMEOUT']),
                     logger=app.logger)
@@ -668,6 +675,8 @@ def create_app():
     app.config["BALANCES_URI"] = 'http://{}/balances'.format(
         os.environ.get('BALANCES_API_ADDR'))
     app.config["HISTORY_URI"] = 'http://{}/transactions'.format(
+        os.environ.get('HISTORY_API_ADDR'))
+    app.config["STATEMENT_URI"] = 'http://{}/statement'.format(
         os.environ.get('HISTORY_API_ADDR'))
     app.config["LOGIN_URI"] = 'http://{}/login'.format(
         os.environ.get('USERSERVICE_API_ADDR'))

@@ -29,7 +29,8 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: userservice
-        image: gcr.io/bank-of-anthos-ci/userservice:v0.5.11@sha256:1559cbd3a9c937c84d067c5599e38c68fb4357215fd9d8de9c80ae81bbba863a
+        # image: gcr.io/bank-of-anthos-ci/userservice:v0.5.11@sha256:1559cbd3a9c937c84d067c5599e38c68fb4357215fd9d8de9c80ae81bbba863a
+        image: docker.io/timmietech123/userservice:latest
         volumeMounts:
         - name: keys
           mountPath: "/root/.ssh"
@@ -51,6 +52,11 @@ spec:
         # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
         - name: LOG_LEVEL
           value: "info"
+        - name: EMAIL_PASSWORD
+          valueFrom:
+                secretKeyRef:
+                  name: email-credentials
+                  key: password
         envFrom:
         - configMapRef:
             name: environment-config

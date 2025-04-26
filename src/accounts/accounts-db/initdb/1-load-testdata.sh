@@ -32,10 +32,10 @@ readonly ENV_VARS=(
 
 
 add_user() {
-  # Usage:  add_user "ACCOUNTID" "USERNAME" "FIRST_NAME"
-  echo "adding user: $2"
-  psql -X -v ON_ERROR_STOP=1 -v account="$1" -v username="$2" -v firstname="$3" -v passhash="$DEFAULT_PASSHASH" --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    INSERT INTO users VALUES (:'account', :'username', :'passhash', :'firstname', 'User', '2000-01-01', '-5', 'Bowling Green, New York City', 'NY', '10004', '111-22-3333') ON CONFLICT DO NOTHING;
+  # Usage:  add_user "ACCOUNTID" "USERNAME" "FIRST_NAME" "EMAIL"
+  echo "adding user: $2 with email: $4"
+  psql -X -v ON_ERROR_STOP=1 -v account="$1" -v username="$2" -v firstname="$3" -v email="$4" -v passhash="$DEFAULT_PASSHASH" --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    INSERT INTO users VALUES (:'account', :'username', :'passhash', :'firstname', 'User', '2000-01-01', '-5', 'Bowling Green, New York City', 'NY', '10004', '111-22-3333' : 'email') ON CONFLICT DO NOTHING;
 EOSQL
 }
 
@@ -61,10 +61,10 @@ EOSQL
 # Load test data into the database
 create_accounts() {
   # Add demo users.
-  add_user "1011226111" "testuser" "Test"
-  add_user "1033623433" "alice" "Alice"
-  add_user "1055757655" "bob" "Bob"
-  add_user "1077441377" "eve" "Eve"
+  add_user "1011226111" "testuser" "Test" "testuser@example.com"
+  add_user "1033623433" "alice" "Alice"  "alice@example.com"
+  add_user "1055757655" "bob" "Bob" "bob@example.com"
+  add_user "1077441377" "eve" "Eve" "eve@example.com"
 
   # Make everyone contacts of each other
   add_contact "testuser" "Alice" "1033623433"
