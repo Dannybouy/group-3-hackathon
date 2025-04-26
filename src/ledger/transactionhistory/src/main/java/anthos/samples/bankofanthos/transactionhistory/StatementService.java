@@ -13,7 +13,12 @@ public class StatementService {
     @Autowired // automatically connects to the TransactionRepository
     private TransactionRepository transactionRepository;
 
-    public BankStatement generateStatement(String accountId, String routingNum, Date startDate, Date endDate) {
+    public BankStatement generateStatement(
+            String accountId,
+            String userName,
+            String routingNum,
+            Date startDate,
+            Date endDate) {
 
         // Get opening balance as of the start date
         Long openingBalance = transactionRepository.getBalanceAsOf(accountId, routingNum, startDate);
@@ -37,7 +42,17 @@ public class StatementService {
         Long closingBalance = transactionRepository.getBalanceAsOf(accountId, routingNum, endDate);
 
         // Create a new BankStatement object
-        BankStatement statement = new BankStatement(accountId, startDate, endDate, openingBalance, closingBalance, transactions, totalDeposits, totalWithdrawals);
+        BankStatement statement = new BankStatement(
+            accountId,
+            userName,
+            startDate,
+            endDate,
+            openingBalance,
+            closingBalance,
+            transactions,
+            totalDeposits,
+            totalWithdrawals
+        );
 
         return statement;
     }

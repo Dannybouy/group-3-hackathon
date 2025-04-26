@@ -23,6 +23,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
 import io.micrometer.stackdriver.StackdriverMeterRegistry;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Deque;
@@ -32,7 +33,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -215,6 +218,9 @@ public final class TransactionHistoryController {
 
     @Autowired
     private StatementService statementService;
+    
+    @Autowired
+    private StatementPdfGenerator statementPdfGenerator;
 
     @GetMapping("/statement/{accountId}")
     public ResponseEntity<?> generateStatement(
@@ -222,47 +228,121 @@ public final class TransactionHistoryController {
         @PathVariable String accountId,
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate
-        //@RequestParam String localRoutingNum //local routing number
         ) 
-                {
-                    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-                        bearerToken = bearerToken.split("Bearer ")[1];
-                    }
-        
-                    try {
-                        // Check that the bearer token is valid
-                        DecodedJWT jwt = verifier.verify(bearerToken);
-        
-                        // Check that the authenticated user can access this account
-                        if (!accountId.equals(jwt.getClaim("acct").asString())) {
-                            LOGGER.error("Failed to generate statement: "
-                                + "not authorized");
-                            return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
-                        }
-        
-                        // Validate the dates
-                        if(startDate.after(endDate)) {
-                            LOGGER.error("Start date cannot be after end date");
-                            return new ResponseEntity<>("Start date must be before end date", HttpStatus.BAD_REQUEST);
-                        }
-        
-                        // Generate the statement
-                        BankStatement statement = statementService.generateStatement(accountId, localRoutingNum, startDate, endDate);
+    {
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            bearerToken = bearerToken.split("Bearer ")[1];
+        }
 
-                return new ResponseEntity<>(statement, HttpStatus.OK);
+        try {
+            // Check that the bearer token is valid
+            DecodedJWT jwt = verifier.verify(bearerToken);
 
-            } catch (JWTVerificationException e) {
-                LOGGER.error("Failed to generate statement: not authorized");
+            // Extract user name from JWT
+            String userName = jwt.getClaim("name").asString();
+
+            // Check that the authenticated user can access this account
+            if (!accountId.equals(jwt.getClaim("acct").asString())) {
+                LOGGER.error("Failed to generate statement: "
+                    + "not authorized");
                 return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("Failed to generate statement: invalid date range");
-                return new ResponseEntity<>("Invalid date range", HttpStatus.BAD_REQUEST);
-            } catch (Exception e) {
-                LOGGER.error("Failed to generate statement: " + e.getMessage());
-                return new ResponseEntity<>("Failed to generate statement", HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
+            // Validate the dates
+            if(startDate.after(endDate)) {
+                LOGGER.error("Start date cannot be after end date");
+                return new ResponseEntity<>("Start date must be before end date", HttpStatus.BAD_REQUEST);
+            }
+
+            // Generate the statement
+            BankStatement statement = statementService.generateStatement(accountId, userName, localRoutingNum, startDate, endDate);
+
+            return new ResponseEntity<>(statement, HttpStatus.OK);
+
+        } catch (JWTVerificationException e) {
+            LOGGER.error("Failed to generate statement: not authorized");
+            return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Failed to generate statement: invalid date range");
+            return new ResponseEntity<>("Invalid date range", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            LOGGER.error("Failed to generate statement: " + e.getMessage());
+            return new ResponseEntity<>("Failed to generate statement", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Generate a PDF bank statement for the specified account and date range.
+     *
+     * @param bearerToken  HTTP request 'Authorization' header
+     * @param accountId    the account to generate statement for
+     * @param startDate    start date for the statement period
+     * @param endDate      end date for the statement period
+     * @return            PDF bank statement data or error response
+     */
+    @GetMapping(value = "/statement/{accountId}/pdf", 
+               produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<?> generateStatementPdf(
+            @RequestHeader("Authorization") String bearerToken,
+            @PathVariable String accountId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
+        
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            bearerToken = bearerToken.split("Bearer ")[1];
+        }
+        
+        try {
+            // Verify JWT token
+            DecodedJWT jwt = verifier.verify(bearerToken);
+            
+            // Check authorization
+            if (!accountId.equals(jwt.getClaim("acct").asString())) {
+                LOGGER.error("Failed to generate statement PDF: not authorized");
+                return new ResponseEntity<>("not authorized",
+                    HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Validate dates
+            if(startDate.after(endDate)) {
+                LOGGER.error("Start date cannot be after end date");
+                return new ResponseEntity<>("Start date must be before end date", 
+                    HttpStatus.BAD_REQUEST);
+            }
+            
+            // Generate the statement
+            String userName = jwt.getClaim("name").asString();
+            BankStatement statement = statementService.generateStatement(
+                accountId, 
+                userName,
+                localRoutingNum, 
+                startDate, 
+                endDate
+            );
+            
+            // Generate PDF
+            byte[] pdfBytes = statementPdfGenerator.generatePdf(statement);
+            
+            // Return PDF
+            return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, 
+                    "attachment; filename=bank_statement.pdf")
+                .body(pdfBytes);
+                
+        } catch (JWTVerificationException e) {
+            LOGGER.error("Failed to generate statement PDF: not authorized");
+            return new ResponseEntity<>("not authorized", HttpStatus.UNAUTHORIZED);
+        } catch (IOException e) {
+            LOGGER.error("Failed to generate statement PDF: " + e.getMessage());
+            return new ResponseEntity<>("Error generating PDF", 
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            LOGGER.error("Failed to generate statement PDF: " + e.getMessage());
+            return new ResponseEntity<>("Failed to generate statement PDF", 
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 //eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdHVzZXIiLCJhY2N0IjoiMTAxMTIyNjExMSIsIm5hbWUiOiJUZXN0IFVzZXIiLCJpYXQiOjE3NDUwNjU4NjgsImV4cCI6MTc0NTA2OTQ2OH0.ou7i3FAiH3w2OGUeUF3YJdu5x6BUrfziDQJo9nxqntJU_wEM3Res6uS4A7V6x5jQTRuYOd__Ma4NH_ho1kefPCxWdVI_XKB7mfWvcVWa6sdBOEzfd8mHTkvmMEehuCFAOPOtwU6MoLSWjghUzuNjCcP2_EoK8xUhsgp_SRQhjMpt8Y-8UxBvdfRz9nLByuPcOKhHfMDnPoodw-iTibYwmSZlMMSXO6pnsEtr3XplRLYMBK_r9KilZ181fqpHWOrM9wWXAwVaCye4s4jb8tDQqrZzyS8UdLRXNCnyqf285mwy34D5sHeX36u51Yl-OtZL9pWQz-3gfprOkflhwwi_tNbp_fNEzOjVVkG4voLG8cWRiE-_g8d8dTmsC_5-1E_zCX7XuZ5bYLEsI80Sqr7Q-SK1tRpZDkagc1z8Q4FSjoeWi6yLDC-Gdk1U8VFFj9inzmfLa8qEcqEvqzwJgvzeg1EJ0CYFQMR0ZK9Z8CCwOzFMvsBPzEIKiK1AiDxDbulQezlO9kVFIk7JCbwI4wd7tJW_qY3uCkdUCd52rtIktYZjsJTc7L2bv34jng_2vPiVwJVFk61yTKiueiNQXKYokco2OCLdykChO7W4i5Vy9b7Pft-M7Sn1kZoYWZWSuHNFurChZ0s8daw5L1cre0d4o6HIKETKzwrUweh7SV0ZXag

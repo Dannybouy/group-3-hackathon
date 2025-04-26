@@ -132,6 +132,24 @@ limitations under the License.
         </div>
       </div>
 
+      <!-- Generate Statement Button -->
+      <div class="col-lg-4 deposit-send-payment-div">
+        <div class="card card-button deposit-send-button" data-toggle="modal" data-target="#statementModal" data-keyboard="false" data-backdrop="static">
+          <div class="card-body">
+            <div class="row align-items-start">
+              <div class="col">
+                <span class="h5 mb-0" id="statementSpan">
+                  Generate Statement
+                </span>
+              </div>
+              <div class="button-icon col-auto">
+                <span class="material-icons" id="statement-icon">description</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Transaction History Table -->
       <div class="row col-lg-12 mb-4 align-items-start">
         <div class="col-lg-12">
@@ -383,6 +401,43 @@ limitations under the License.
 
             <input type="hidden" id="payment-uuid" name="uuid">
             </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statement Modal -->
+      <div class="modal fade" id="statementModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="modal-title header-title">Generate Bank Statement</h3>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-10 offset-md-1 mb-3">
+                  <label class="text-uppercase text-muted secondary-text mb-1" for="startDate">Start Date</label>
+                  <input class="form-control" type="date" id="startDate" name="startDate" required>
+                  <div class="invalid-feedback">
+                    Please select a start date.
+                  </div>
+                </div>
+                <div class="col-md-10 offset-md-1 mb-3">
+                  <label class="text-uppercase text-muted secondary-text mb-1" for="endDate">End Date</label>
+                  <input class="form-control" type="date" id="endDate" name="endDate" required>
+                  <div class="invalid-feedback">
+                    Please select an end date.
+                  </div>
+                  <small id="dateError" class="text-danger hidden">Start date must be before end date.</small>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary btn-with-padding deposit-send-button" id="generatePdfButton">Generate PDF</button>
+            </div>
           </div>
         </div>
       </div>
