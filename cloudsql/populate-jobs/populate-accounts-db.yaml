@@ -119,7 +119,7 @@ data:
       state CHAR(2) NOT NULL,
       zip VARCHAR(5) NOT NULL,
       ssn CHAR(11) NOT NULL,
-      email VARCHAR(128) UNIQUE NOT NULL -- Added email column
+      email VARCHAR(128) UNIQUE NOT NULL
     );
 
     CREATE INDEX IF NOT EXISTS idx_users_accountid ON users (accountid);
@@ -260,7 +260,7 @@ spec:
       containers:
       - name: sidecar-controller
         image: bash@sha256:64defcbc5126c2d81122b4fb78a629a6d27068f0842c4a8302b8273415b12e30
-        command: ['bash', '-c', '. /scripts/wait-to-complete-sidecar.sh "initialize-database. " "cloud_sql_proxy"']
+        command: ['bash', '-c', '. /scripts/wait-to-complete-sidecar.sh "initialize-database.sh" "cloud_sql_proxy"']
         volumeMounts:
         - name: scripts
           mountPath: "/scripts"
