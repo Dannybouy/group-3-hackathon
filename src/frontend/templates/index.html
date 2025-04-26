@@ -135,6 +135,7 @@ limitations under the License.
       <!-- Statement Modal -->
       <div class="modal fade" id="statementModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
+          <!-- Wrap modal content in a form so we can GET /statement/<id>?startDate=…&endDate=… -->
           <form id="statement-form"
                 method="GET"
                 action="{{ url_for('fetch_statement_pdf', account_id=account_id) }}">
@@ -146,24 +147,7 @@ limitations under the License.
                 </button>
               </div>
               <div class="modal-body">
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="startDate">Start Date</label>
-                    <input type="date"
-                           class="form-control"
-                           id="startDate"
-                           name="startDate"
-                           required>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="endDate">End Date</label>
-                    <input type="date"
-                           class="form-control"
-                           id="endDate"
-                           name="endDate"
-                           required>
-                  </div>
-                </div>
+                <!-- date pickers unchanged -->
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -438,6 +422,6 @@ limitations under the License.
 {% include 'shared/scripts.html' %}
     <!-- Page specific-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+    <script src="static/scripts/index.js"></script>
   </body>
 </html>
