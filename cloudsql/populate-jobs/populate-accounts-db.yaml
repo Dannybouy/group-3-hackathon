@@ -119,10 +119,10 @@ data:
       state CHAR(2) NOT NULL,
       zip VARCHAR(5) NOT NULL,
       ssn CHAR(11) NOT NULL,
-      email VARCHAR(255) NOT NULL -- Added email column
+      email VARCHAR(128) UNIQUE NOT NULL
     );
 
-    CREATE INDEX IF NOT EXISTS idx_users_accountid ON users (accountid);x 
+    CREATE INDEX IF NOT EXISTS idx_users_accountid ON users (accountid);
     CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
 
 
