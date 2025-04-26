@@ -67,10 +67,10 @@ public interface TransactionRepository
     @Query(value = "SELECT " +
            "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
            "WHERE TO_ACCT = ?1 AND TO_ROUTE = ?2 " +
-           "AND TIMESTAMP < ?3) - " +
+           "AND TIMESTAMP <= ?3) - " +
            "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
            "WHERE FROM_ACCT = ?1 AND FROM_ROUTE = ?2 " +
-           "AND TIMESTAMP < ?3)",
+           "AND TIMESTAMP <= ?3)",
            nativeQuery = true)
     Long getBalanceAsOf(String accountNum, String routingNum, Date date);
 }
