@@ -4,6 +4,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +21,13 @@ public class StatementPdfGenerator {
     private static final float LINE_HEIGHT = 15;
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("$#,##0.00");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    
+    private final String localRoutingNum;
+    
+    @Autowired
+    public StatementPdfGenerator(@Value("${LOCAL_ROUTING_NUM}") String localRoutingNum) {
+        this.localRoutingNum = localRoutingNum;
+    }
     
     public byte[] generatePdf(BankStatement statement) throws IOException {
         PDDocument document = new PDDocument();
@@ -226,7 +235,7 @@ public class StatementPdfGenerator {
                 content.beginText();
                 content.setFont(PDType1Font.HELVETICA, 10);
                 content.newLineAtOffset(dateColX, y);
-                content.showText(DATE_FORMAT.format(new Date())); // Temporary fix - use current date
+                content.showText(DATE_FORMAT.format(txn.getTimestamp()));
                 content.endText();
                 
                 // Type
@@ -244,6 +253,14 @@ public class StatementPdfGenerator {
                 content.newLineAtOffset(accountColX, y);
                 String counterpartyAccount = txn.getToAccountNum().equals(accountId) 
                     ? txn.getFromAccountNum() : txn.getToAccountNum();
+                String counterpartyRouting = txn.getToAccountNum().equals(accountId)
+                    ? txn.getFromRoutingNum() : txn.getToRoutingNum();
+                
+                // Check if this is an external bank transfer by comparing routing numbers
+                if (!counterpartyRouting.equals(localRoutingNum)) {
+                    counterpartyAccount += " (External Bank)";
+                }
+                
                 content.showText(counterpartyAccount);
                 content.endText();
                 
