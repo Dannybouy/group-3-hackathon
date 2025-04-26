@@ -70,30 +70,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     RefreshModals();
   });
 
-  // Added the Generate Statement Logic
-  document.getElementById("generate").addEventListener("click", function(e){
-    e.preventDefault();
-    document.querySelector('#transaction-table').style.setProperty('height', '100%', 'important');
-    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'none', 'important');
-    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'none', 'important');
-    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'none', 'important');
-    const element = document.getElementById('content');
-    const options = {
-    margin: 0.1,
-    filename: 'Bank Statement',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 1 },
-    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-
-    html2pdf().set(options).from(element).save().then(function(){
-    document.querySelector('#transaction-table').style.setProperty('height', '500px', 'important');
-    document.querySelectorAll('.col-lg-4')[3].style.setProperty('display', 'block', 'important');
-    document.querySelectorAll('.col-lg-4')[2].style.setProperty('display', 'block', 'important');
-    document.querySelectorAll('.col-lg-4')[1].style.setProperty('display', 'block', 'important');
-    })
-})
 
   //Added the toggle Button Logic
   if (!localStorage.getItem("mode")) {
