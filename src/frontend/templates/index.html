@@ -400,32 +400,41 @@ limitations under the License.
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="modal-body">
-              <div class="row">
-                <div class="col-md-10 offset-md-1 mb-3">
-                  <label class="text-uppercase text-muted secondary-text mb-1" for="startDate">Start Date</label>
-                  <input class="form-control" type="date" id="startDate" name="startDate" required>
-                  <div class="invalid-feedback">
-                    Please select a start date.
+            <form id="statement-form" target="_blank" method="GET">
+              <input type="hidden" name="accountId" id="statementAccountId">
+              <div class="modal-body">
+                <div class="row">
+                  <div class="col-md-10 offset-md-1 mb-3">
+                    <label class="text-uppercase text-muted secondary-text mb-1" for="startDate">Start Date</label>
+                    <input class="form-control" type="date" id="startDate" name="startDate" required>
+                    <div class="invalid-feedback">
+                      Please select a start date.
+                    </div>
                   </div>
-                </div>
-                <div class="col-md-10 offset-md-1 mb-3">
-                  <label class="text-uppercase text-muted secondary-text mb-1" for="endDate">End Date</label>
-                  <input class="form-control" type="date" id="endDate" name="endDate" required>
-                  <div class="invalid-feedback">
-                    Please select an end date.
+                  <div class="col-md-10 offset-md-1 mb-3">
+                    <label class="text-uppercase text-muted secondary-text mb-1" for="endDate">End Date</label>
+                    <input class="form-control" type="date" id="endDate" name="endDate" required>
+                    <div class="invalid-feedback">
+                      Please select an end date.
+                    </div>
+                    <small id="dateError" class="text-danger hidden">Start date must be before end date.</small>
                   </div>
-                  <small id="dateError" class="text-danger hidden">Start date must be before end date.</small>
                 </div>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary btn-with-padding deposit-send-button" id="generatePdfButton">Generate PDF</button>
-            </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-with-padding deposit-send-button" id="generatePdfButton">Generate PDF</button>
+                <a href="#" id="directPdfLink" target="_blank" class="btn btn-outline-secondary btn-sm">Direct Link</a>
+              </div>
+            </form>
           </div>
         </div>
       </div>
+      
+      <!-- Hidden form for PDF submissions -->
+      <form id="pdf-download-form" method="GET" target="_blank" style="display: none;">
+        <input type="hidden" id="pdf-form-url" name="pdf-form-url">
+      </form>
     </main>
 {% include 'shared/footer.html' %}
 {% include 'shared/scripts.html' %}

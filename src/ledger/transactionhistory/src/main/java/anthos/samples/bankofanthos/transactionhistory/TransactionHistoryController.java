@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ContentDisposition;
 
 /**
  * Controller for the TransactionHistory service.
@@ -323,11 +324,21 @@ public final class TransactionHistoryController {
             // Generate PDF
             byte[] pdfBytes = statementPdfGenerator.generatePdf(statement);
             
-            // Return PDF
+            // Return PDF with enhanced headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition
+                .attachment()
+                .filename("bank_statement.pdf")
+                .build());
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
+            headers.add("X-Content-Type-Options", "nosniff");
+            
             return ResponseEntity
                 .ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, 
-                    "attachment; filename=bank_statement.pdf")
+                .headers(headers)
                 .body(pdfBytes);
                 
         } catch (JWTVerificationException e) {

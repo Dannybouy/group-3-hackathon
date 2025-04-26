@@ -159,14 +159,47 @@ document.addEventListener("DOMContentLoaded", function(event) {
   RefreshModals();
 
   // --- Generate PDF Statement Logic ---
-  const generatePdfButton = document.getElementById('generatePdfButton');
+  const statementForm = document.getElementById('statement-form');
   const startDateInput = document.getElementById('startDate');
   const endDateInput = document.getElementById('endDate');
   const dateError = document.getElementById('dateError');
-  const accountId = document.querySelector('.account-number').textContent; // Get account ID from page
-
-  if (generatePdfButton) {
-    generatePdfButton.addEventListener('click', function() {
+  const directPdfLink = document.getElementById('directPdfLink');
+  const accountId = document.querySelector('.account-number').textContent.trim(); // Get account ID from page
+  console.log('Account ID:', accountId);
+  
+  // Format today's date as YYYY-MM-DD for the date input
+  function getTodayFormatted() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading zero if needed
+    const day = String(today.getDate()).padStart(2, '0'); // Add leading zero if needed
+    return `${year}-${month}-${day}`;
+  }
+  
+  // Set max attribute for date inputs to prevent future dates
+  const today = getTodayFormatted();
+  if (startDateInput) startDateInput.setAttribute('max', today);
+  if (endDateInput) endDateInput.setAttribute('max', today);
+  
+  // Set end date to today when modal opens
+  $('#statementModal').on('shown.bs.modal', function() {
+    endDateInput.value = today;
+    // Update direct link if start date is also set
+    updateDirectLink();
+  });
+  
+  // Set account ID in hidden field
+  if (document.getElementById('statementAccountId')) {
+    document.getElementById('statementAccountId').value = accountId;
+  }
+  
+  // Set up the form action
+  if (statementForm) {
+    statementForm.action = `/statement/${accountId}/pdf`;
+    
+    // Add form validation
+    statementForm.addEventListener('submit', function(e) {
+      console.log('Statement form submitted');
       const startDate = startDateInput.value;
       const endDate = endDateInput.value;
       let isValid = true;
@@ -190,35 +223,62 @@ document.addEventListener("DOMContentLoaded", function(event) {
         dateError.classList.remove('hidden');
         isValid = false;
       }
-
-      if (isValid) {
-        // Construct URL and trigger download
-        const pdfUrl = `/statement/${accountId}/pdf?startDate=${startDate}&endDate=${endDate}`;
-        console.log(`Generating PDF from: ${pdfUrl}`);
-        window.location.href = pdfUrl;
-
-        // Close the modal (optional)
+      
+      if (!isValid) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Close the modal after a short delay to allow the form to submit
+      setTimeout(function() {
         $('#statementModal').modal('hide');
-
-        // Reset modal fields after generation
+        
+        // Reset form
         startDateInput.value = '';
         endDateInput.value = '';
-        startDateInput.classList.remove('is-invalid');
-        endDateInput.classList.remove('is-invalid');
-        dateError.classList.add('hidden');
-
+      }, 500);
+    });
+  }
+  
+  // Function to update direct link
+  function updateDirectLink() {
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    if (startDate && endDate) {
+      const pdfUrl = `/statement/${accountId}/pdf?startDate=${startDate}&endDate=${endDate}`;
+      directPdfLink.href = pdfUrl;
+      directPdfLink.classList.remove('disabled');
+    } else {
+      directPdfLink.href = '#';
+      directPdfLink.classList.add('disabled');
+    }
+  }
+  
+  // Update link when date inputs change
+  if (startDateInput) startDateInput.addEventListener('change', updateDirectLink);
+  if (endDateInput) endDateInput.addEventListener('change', updateDirectLink);
+  
+  // Initialize direct link state
+  if (directPdfLink) {
+    directPdfLink.classList.add('disabled');
+    directPdfLink.addEventListener('click', function(e) {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      if (!startDate || !endDate) {
+        e.preventDefault();
+        alert('Please select both start and end dates');
       }
     });
   }
 
   // Reset statement modal validation on close
   $('#statementModal').on('hidden.bs.modal', function (e) {
-      startDateInput.value = '';
-      endDateInput.value = '';
-      startDateInput.classList.remove('is-invalid');
-      endDateInput.classList.remove('is-invalid');
-      dateError.classList.add('hidden');
-  })
+    startDateInput.value = '';
+    endDateInput.value = '';
+    startDateInput.classList.remove('is-invalid');
+    endDateInput.classList.remove('is-invalid');
+    dateError.classList.add('hidden');
+  });
   // --- End Generate PDF Statement Logic ---
 
 });
