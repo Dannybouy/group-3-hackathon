@@ -163,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   const startDateInput = document.getElementById('startDate');
   const endDateInput = document.getElementById('endDate');
   const dateError = document.getElementById('dateError');
-  const directPdfLink = document.getElementById('directPdfLink');
   const accountId = document.querySelector('.account-number').textContent.trim(); // Get account ID from page
   console.log('Account ID:', accountId);
   
@@ -184,8 +183,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // Set end date to today when modal opens
   $('#statementModal').on('shown.bs.modal', function() {
     endDateInput.value = today;
-    // Update direct link if start date is also set
-    updateDirectLink();
   });
   
   // Set account ID in hidden field
@@ -239,37 +236,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }, 500);
     });
   }
-  
-  // Function to update direct link
-  function updateDirectLink() {
-    const startDate = startDateInput.value;
-    const endDate = endDateInput.value;
-    if (startDate && endDate) {
-      const pdfUrl = `/statement/${accountId}/pdf?startDate=${startDate}&endDate=${endDate}`;
-      directPdfLink.href = pdfUrl;
-      directPdfLink.classList.remove('disabled');
-    } else {
-      directPdfLink.href = '#';
-      directPdfLink.classList.add('disabled');
-    }
-  }
-  
-  // Update link when date inputs change
-  if (startDateInput) startDateInput.addEventListener('change', updateDirectLink);
-  if (endDateInput) endDateInput.addEventListener('change', updateDirectLink);
-  
-  // Initialize direct link state
-  if (directPdfLink) {
-    directPdfLink.classList.add('disabled');
-    directPdfLink.addEventListener('click', function(e) {
-      const startDate = startDateInput.value;
-      const endDate = endDateInput.value;
-      if (!startDate || !endDate) {
-        e.preventDefault();
-        alert('Please select both start and end dates');
-      }
-    });
-  }
 
   // Reset statement modal validation on close
   $('#statementModal').on('hidden.bs.modal', function (e) {
@@ -281,50 +247,52 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
   // --- End Generate PDF Statement Logic ---
 
-  // --- Send Statement by Email Logic ---
-  function sendStatementByEmail() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    const accountId = document.querySelector('.account-number').textContent.trim();
-
-    if (!startDate || !endDate) {
-        alert('Please select start and end dates');
-        return;
-    }
-
-    // Show loading indicator
-    const button = document.querySelector('#sendStatementEmail');
-    const originalText = button.textContent;
-    button.textContent = 'Sending...';
-    button.disabled = true;
-
-    fetch(`/send_statement_email/${accountId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            startDate: startDate,
-            endDate: endDate
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        alert('Statement sent to your registered email!');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to send statement: ' + error.message);
-    })
-    .finally(() => {
-        // Reset button
-        button.textContent = originalText;
-        button.disabled = false;
-    });
-  }
-  // --- End Send Statement by Email Logic ---
-
 });
+
+// --- Send Statement by Email Logic ---
+// Moving this function outside the DOMContentLoaded event listener
+// to make it globally accessible
+function sendStatementByEmail() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const accountId = document.querySelector('.account-number').textContent.trim();
+
+  if (!startDate || !endDate) {
+      alert('Please select start and end dates');
+      return;
+  }
+
+  // Show loading indicator
+  const button = document.querySelector('#sendStatementEmail');
+  const originalText = button.textContent;
+  button.textContent = 'Sending...';
+  button.disabled = true;
+
+  fetch(`/send_statement_email/${accountId}`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          startDate: startDate,
+          endDate: endDate
+      })
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.error) {
+          throw new Error(data.error);
+      }
+      alert('Statement sent to your registered email!');
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to send statement: ' + error.message);
+  })
+  .finally(() => {
+      // Reset button
+      button.textContent = originalText;
+      button.disabled = false;
+  });
+}
+// --- End Send Statement by Email Logic ---
