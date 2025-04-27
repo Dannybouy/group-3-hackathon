@@ -281,4 +281,50 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
   // --- End Generate PDF Statement Logic ---
 
+  // --- Send Statement by Email Logic ---
+  function sendStatementByEmail() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const accountId = document.querySelector('.account-number').textContent.trim();
+
+    if (!startDate || !endDate) {
+        alert('Please select start and end dates');
+        return;
+    }
+
+    // Show loading indicator
+    const button = document.querySelector('#sendStatementEmail');
+    const originalText = button.textContent;
+    button.textContent = 'Sending...';
+    button.disabled = true;
+
+    fetch(`/send_statement_email/${accountId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            startDate: startDate,
+            endDate: endDate
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        alert('Statement sent to your registered email!');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send statement: ' + error.message);
+    })
+    .finally(() => {
+        // Reset button
+        button.textContent = originalText;
+        button.disabled = false;
+    });
+  }
+  // --- End Send Statement by Email Logic ---
+
 });
