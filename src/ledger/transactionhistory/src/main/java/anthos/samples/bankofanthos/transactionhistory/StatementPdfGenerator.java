@@ -4,6 +4,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
+import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.awt.Color;
 
 @Service
 public class StatementPdfGenerator {
@@ -22,6 +25,16 @@ public class StatementPdfGenerator {
     private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("$#,##0.00");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     
+    // Add color constants
+    private static final PDColor GREEN_COLOR = new PDColor(new float[]{0.0f, 0.5f, 0.0f}, PDDeviceRGB.INSTANCE);
+    private static final PDColor RED_COLOR = new PDColor(new float[]{0.8f, 0.0f, 0.0f}, PDDeviceRGB.INSTANCE);
+    private static final PDColor GRAY_COLOR = new PDColor(new float[]{0.5f, 0.5f, 0.5f}, PDDeviceRGB.INSTANCE);
+    
+    // Add table constants
+    private static final float[] TABLE_WIDTHS = {100f, 80f, 150f, 100f};  // Column widths
+    private static final float TABLE_ROW_HEIGHT = 20f;
+    private static final float TABLE_CELL_PADDING = 5f;
+
     private final String localRoutingNum;
     
     @Autowired
@@ -176,106 +189,67 @@ public class StatementPdfGenerator {
                 PDPageContentStream.AppendMode.APPEND, true, true)) {
             
             float y = page.getMediaBox().getHeight() - MARGIN;
+            float tableStartX = MARGIN;
             
-            // For first page, start lower to account for headers
+            // Adjust starting Y position for first page
             if (pageNum == 0) {
                 y -= LINE_HEIGHT * 12;
             } else {
-                // Add page header for continuation pages
+                // Add continuation header
                 content.beginText();
                 content.setFont(PDType1Font.HELVETICA_BOLD, 12);
                 content.newLineAtOffset(MARGIN, y);
                 content.showText("Transaction History (Continued)");
                 content.endText();
                 y -= LINE_HEIGHT * 2;
-                
-                // Add column headers
-                float dateColX = MARGIN;
-                float typeColX = dateColX + 100;
-                float accountColX = typeColX + 80;
-                float amountColX = accountColX + 150;
-                
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA_BOLD, 10);
-                content.newLineAtOffset(dateColX, y);
-                content.showText("Date");
-                content.endText();
-                
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA_BOLD, 10);
-                content.newLineAtOffset(typeColX, y);
-                content.showText("Type");
-                content.endText();
-                
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA_BOLD, 10);
-                content.newLineAtOffset(accountColX, y);
-                content.showText("Account");
-                content.endText();
-                
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA_BOLD, 10);
-                content.newLineAtOffset(amountColX, y);
-                content.showText("Amount");
-                content.endText();
-                
-                y -= LINE_HEIGHT * 1.5f;
             }
-            
-            // Define columns
-            float dateColX = MARGIN;
-            float typeColX = dateColX + 100;
-            float accountColX = typeColX + 80;
-            float amountColX = accountColX + 150;
-            
-            // Add transactions
-            content.setFont(PDType1Font.HELVETICA, 10);
+
+            // Draw table headers
+            String[] headers = {"Date", "Type", "Account", "Amount"};
+            float currentX = tableStartX;
+            for (int i = 0; i < headers.length; i++) {
+                drawTableCell(content, currentX, y, TABLE_WIDTHS[i], TABLE_ROW_HEIGHT, 
+                             headers[i], true, null);
+                currentX += TABLE_WIDTHS[i];
+            }
+            y -= TABLE_ROW_HEIGHT;
+
+            // Draw transaction rows
             for (Transaction txn : transactions) {
+                currentX = tableStartX;
+                boolean isCredit = txn.getToAccountNum().equals(accountId);
+                PDColor amountColor = isCredit ? GREEN_COLOR : RED_COLOR;
+                
                 // Date
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA, 10);
-                content.newLineAtOffset(dateColX, y);
-                content.showText(DATE_FORMAT.format(txn.getTimestamp()));
-                content.endText();
+                drawTableCell(content, currentX, y, TABLE_WIDTHS[0], TABLE_ROW_HEIGHT, 
+                             DATE_FORMAT.format(txn.getTimestamp()), false, null);
+                currentX += TABLE_WIDTHS[0];
                 
                 // Type
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA, 10);
-                content.newLineAtOffset(typeColX, y);
-                String txnType = txn.getToAccountNum().equals(accountId) 
-                    ? "CREDIT" : "DEBIT";
-                content.showText(txnType);
-                content.endText();
+                drawTableCell(content, currentX, y, TABLE_WIDTHS[1], TABLE_ROW_HEIGHT, 
+                             isCredit ? "CREDIT" : "DEBIT", false, amountColor);
+                currentX += TABLE_WIDTHS[1];
                 
                 // Account
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA, 10);
-                content.newLineAtOffset(accountColX, y);
-                String counterpartyAccount = txn.getToAccountNum().equals(accountId) 
-                    ? txn.getFromAccountNum() : txn.getToAccountNum();
-                String counterpartyRouting = txn.getToAccountNum().equals(accountId)
-                    ? txn.getFromRoutingNum() : txn.getToRoutingNum();
-                
-                // Check if this is an external bank transfer by comparing routing numbers
+                String counterpartyAccount = isCredit ? txn.getFromAccountNum() : txn.getToAccountNum();
+                String counterpartyRouting = isCredit ? txn.getFromRoutingNum() : txn.getToRoutingNum();
                 if (!counterpartyRouting.equals(localRoutingNum)) {
-                    counterpartyAccount += " (External Bank)";
+                    counterpartyAccount += " (External)";
                 }
-                
-                content.showText(counterpartyAccount);
-                content.endText();
+                drawTableCell(content, currentX, y, TABLE_WIDTHS[2], TABLE_ROW_HEIGHT, 
+                             counterpartyAccount, false, null);
+                currentX += TABLE_WIDTHS[2];
                 
                 // Amount
-                content.beginText();
-                content.setFont(PDType1Font.HELVETICA, 10);
-                content.newLineAtOffset(amountColX, y);
-                String prefix = txn.getToAccountNum().equals(accountId) ? "+" : "-";
-                content.showText(prefix + MONEY_FORMAT.format(Math.abs(txn.getAmount()) / 100.0));
-                content.endText();
+                String prefix = isCredit ? "+" : "-";
+                String amount = prefix + MONEY_FORMAT.format(Math.abs(txn.getAmount()) / 100.0);
+                drawTableCell(content, currentX, y, TABLE_WIDTHS[3], TABLE_ROW_HEIGHT, 
+                             amount, false, amountColor);
                 
-                y -= LINE_HEIGHT;
+                y -= TABLE_ROW_HEIGHT;
             }
-            
-            // Page number at the bottom
+
+            // Page number
             content.beginText();
             content.setFont(PDType1Font.HELVETICA, 8);
             content.newLineAtOffset(page.getMediaBox().getWidth() / 2, MARGIN / 2);
@@ -331,4 +305,25 @@ public class StatementPdfGenerator {
             content.endText();
         }
     }
-} 
+
+    private void drawTableCell(PDPageContentStream content, float x, float y, float width, float height, 
+                              String text, boolean isHeader, PDColor textColor) throws IOException {
+        // Draw cell border
+        content.setStrokingColor(GRAY_COLOR);
+        content.addRect(x, y, width, height);
+        content.stroke();
+
+        // Add text
+        content.beginText();
+        content.setFont(isHeader ? PDType1Font.HELVETICA_BOLD : PDType1Font.HELVETICA, 10);
+        if (textColor != null) {
+            content.setNonStrokingColor(textColor);
+        }
+        content.newLineAtOffset(x + TABLE_CELL_PADDING, y + TABLE_CELL_PADDING);
+        content.showText(text != null ? text : "");
+        content.endText();
+        
+        // Reset color
+        content.setNonStrokingColor(Color.BLACK);
+    }
+}
