@@ -424,6 +424,12 @@ limitations under the License.
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary btn-with-padding deposit-send-button" id="generatePdfButton">Generate PDF</button>
+                <button type="button" 
+                        id="sendStatementEmail" 
+                        class="btn btn-secondary" 
+                        onclick="sendStatementByEmail()">
+                    Send to My Email
+                </button>
                 <a href="#" id="directPdfLink" target="_blank" class="btn btn-outline-secondary btn-sm">Direct Link</a>
               </div>
             </form>

@@ -18,9 +18,13 @@
 # Module imports
 import concurrent.futures
 import datetime
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import json
 import logging
 import os
+import smtplib
 import socket
 from dotenv import load_dotenv
 from decimal import Decimal, DecimalException
@@ -663,6 +667,172 @@ def create_app():
         except requests.exceptions.RequestException as err:
             app.logger.error('Error generating statement: %s', str(err))
             return abort(500, description="Failed to generate statement")
+
+    @app.route('/send_statement_email/<account_id>', methods=['POST'])
+    def handle_send_statement_email(account_id):
+        token = request.cookies.get(app.config['TOKEN_NAME'])
+        if not verify_token(token):
+            return abort(401)
+
+        try:
+            # Get user data from token
+            token_data = decode_token(token)
+            username = token_data['user']
+            firstname = token_data['name'].split()[0]  # Get first name from full name
+            
+            # Get user's email from userservice
+            hed = {'Authorization': 'Bearer ' + token}
+            user_resp = requests.get(
+                url=f'{app.config["USERSERVICE_URI"]}/{username}',
+                headers=hed,
+                timeout=app.config['BACKEND_TIMEOUT']
+            )
+            user_resp.raise_for_status()
+            user_data = user_resp.json()
+            user_email = user_data.get('email')
+
+            if not user_email:
+                return jsonify({'error': 'No email found for user'}), 400
+
+            data = request.get_json()
+            start_date = data.get('startDate')
+            end_date = data.get('endDate')
+            
+            # Get the PDF using existing statement endpoint
+            pdf_response = requests.get(
+                f"{app.config['STATEMENT_URI']}/{account_id}/pdf",
+                params={'startDate': start_date, 'endDate': end_date},
+                headers=hed
+            )
+            
+            if pdf_response.status_code != 200:
+                return jsonify({'error': 'Failed to generate statement'}), 500
+
+            # Send email using our custom function
+            email_sent = send_statement_email(
+                recipient_email=user_email,
+                firstname=firstname,
+                start_date=start_date,
+                end_date=end_date,
+                pdf_content=pdf_response.content
+            )
+            
+            if email_sent:
+                return jsonify({'message': 'Statement sent successfully'}), 200
+            else:
+                return jsonify({'error': 'Failed to send email'}), 500
+            
+        except requests.exceptions.RequestException as e:
+            app.logger.error(f"Error in send_statement_email: {str(e)}")
+            return jsonify({'error': 'Failed to send statement'}), 500
+
+    def send_statement_email(recipient_email, firstname, start_date, end_date, pdf_content):
+        """
+        Send a statement email to user
+        
+        Args:
+            recipient_email: User's email address
+            firstname: User's first name
+            start_date: Statement start date
+            end_date: Statement end date
+            pdf_content: The PDF file content
+        """
+        try:
+            # Get email configuration from environment variables
+            mail_server = os.environ.get('MAIL_SERVER')
+            mail_port = int(os.environ.get('MAIL_PORT', '587'))
+            mail_sender = os.environ.get('MAIL_DEFAULT_SENDER')
+            mail_password = os.environ.get('EMAIL_PASSWORD')
+            use_tls = os.environ.get('MAIL_USE_TLS', 'false').lower() == 'true'
+            
+            # Create message
+            msg = MIMEMultipart()
+            msg['From'] = mail_sender
+            msg['To'] = recipient_email
+            msg['Subject'] = f"Your Bank Statement - {start_date} to {end_date}"
+            
+            # Create styled email body with CSS
+            body = f"""
+            <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333333;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        border: 1px solid #dddddd;
+                        border-radius: 5px;
+                    }}
+                    .header {{
+                        background-color: #4285f4;
+                        color: white;
+                        padding: 15px;
+                        text-align: center;
+                        border-radius: 5px 5px 0 0;
+                    }}
+                    .content {{
+                        padding: 20px;
+                    }}
+                    .footer {{
+                        background-color: #f5f5f5;
+                        padding: 10px;
+                        text-align: center;
+                        font-size: 12px;
+                        border-radius: 0 0 5px 5px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2>Your Bank Statement</h2>
+                    </div>
+                    <div class="content">
+                        <p>Dear {firstname},</p>
+                        
+                        <p>Please find attached your bank statement for the period:</p>
+                        <p><strong>{start_date}</strong> to <strong>{end_date}</strong></p>
+                        
+                        <p>If you have any questions about your statement, please contact our support team.</p>
+                        
+                        <p>Best regards,<br>Group 3 Banking Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>This is an automated message. Please do not reply to this email.</p>
+                        <p>&copy; 2025 Group 3 Banking. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+            # Attach HTML body
+            msg.attach(MIMEText(body, 'html'))
+            
+            # Attach PDF
+            pdf_attachment = MIMEApplication(pdf_content, _subtype='pdf')
+            pdf_attachment.add_header('Content-Disposition', 'attachment', 
+                                    filename=f'bank_statement_{start_date}_to_{end_date}.pdf')
+            msg.attach(pdf_attachment)
+            
+            # Connect to SMTP server and send
+            server = smtplib.SMTP(mail_server, mail_port)
+            if use_tls:
+                server.starttls()
+            server.login(mail_sender, mail_password)
+            server.send_message(msg)
+            server.quit()
+            
+            app.logger.info(f"Statement email sent successfully to {recipient_email}")
+            return True
+        except Exception as e:
+            app.logger.error(f"Failed to send statement email: {str(e)}")
+            return False
 
     def decode_token(token):
         return jwt.decode(algorithms='RS256',
