@@ -30,7 +30,7 @@ import requests
 from requests.exceptions import HTTPError, RequestException
 import jwt
 from flask import Flask, abort, jsonify, make_response, redirect, \
-    render_template, request, url_for
+    render_template, request, url_for, Response
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -95,7 +95,7 @@ def create_app():
         if not verify_token(token):
             return login_page()
         return home()
-
+    
     @app.route("/home")
     def home():
         """
@@ -621,6 +621,48 @@ def create_app():
         resp.delete_cookie(app.config['TOKEN_NAME'])
         resp.delete_cookie(app.config['CONSENT_COOKIE'])
         return resp
+
+    @app.route("/statement/<account_id>/pdf")
+    def generate_statement(account_id):
+        """
+        Generates PDF statement by forwarding the request to the transaction history service
+        """
+        token = request.cookies.get(app.config['TOKEN_NAME'])
+        if not verify_token(token):
+            return abort(401)
+            
+        # Get query parameters
+        start_date = request.args.get('startDate')
+        end_date = request.args.get('endDate')
+        
+        if not start_date or not end_date:
+            return abort(400, description="Start date and end date are required")
+        
+        # Forward the request to the backend service
+        try:
+            hed = {'Authorization': 'Bearer ' + token}
+            backend_url = f"{app.config['STATEMENT_URI']}/{account_id}/pdf"
+            response = requests.get(
+                url=backend_url,
+                params={'startDate': start_date, 'endDate': end_date},
+                headers=hed,
+                timeout=app.config['BACKEND_TIMEOUT']
+            )
+            
+            response.raise_for_status()
+            
+            # Return the PDF file
+            return Response(
+                response.content,
+                mimetype='application/pdf',
+                headers={
+                    'Content-Disposition': f'attachment; filename=statement_{account_id}.pdf'
+                }
+            )
+            
+        except requests.exceptions.RequestException as err:
+            app.logger.error('Error generating statement: %s', str(err))
+            return abort(500, description="Failed to generate statement")
 
     def decode_token(token):
         return jwt.decode(algorithms='RS256',
