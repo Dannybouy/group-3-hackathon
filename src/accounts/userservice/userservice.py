@@ -71,7 +71,7 @@ def create_app():
             
             # Create message
             msg = MIMEMultipart()
-            msg['From'] = mail_sender
+            msg['From'] = f"Group 3 Banking Team <{mail_sender}>"
             msg['To'] = email
             msg['Subject'] = f"Welcome to Our Group 3 Banking, {firstname}!"
             
