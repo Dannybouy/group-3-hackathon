@@ -47,6 +47,11 @@ spec:
          # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
         - name: LOG_LEVEL
           value: "info"
+        - name: EMAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: email-credentials
+              key: password
         # Set to "true" to enable the CymbalBank logo + title
         # - name: CYMBAL_LOGO
         #   value: "false"
@@ -83,6 +88,11 @@ spec:
             name: environment-config
         - configMapRef:
             name: service-api-config
+        - configMapRef:
+            name: email-config
+        - secretRef:
+            name: email-credentials
+            optional: false
         # Customize the metadata server hostname to query for metadata
         #- name: METADATA_SERVER
         #  value: "my-metadata-server"
