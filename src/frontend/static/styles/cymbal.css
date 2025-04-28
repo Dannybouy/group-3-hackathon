@@ -547,3 +547,58 @@ input {
 .in{
   margin-right: 20px;
 }
+
+/* Credit Score Prototype Styles */
+#creditScoreSection {
+  text-align: center;
+}
+
+#creditScoreValue {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+.progress {
+  height: 1.5rem;
+  border-radius: 0.75rem;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  transition: width 1s ease;
+  border-radius: 0.75rem;
+}
+
+#creditFactors .list-group-item {
+  background-color: transparent;
+  border-color: rgba(0, 0, 0, 0.125);
+}
+
+#quickCashEligibility {
+  text-align: center;
+}
+
+#quickCashOptions {
+  margin-top: 1rem;
+}
+
+#requestQuickCash {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+#eligibilityStatus {
+  font-weight: 500;
+  min-height: 24px;
+}
+
+/* Dark mode compatibility */
+body[style*="background-color: #111"] #creditFactors .list-group-item {
+  background-color: #333;
+  border-color: rgba(255, 255, 255, 0.125);
+}
+
+body[style*="background-color: #111"] #creditScoreValue {
+  color: #64b5f6;
+}

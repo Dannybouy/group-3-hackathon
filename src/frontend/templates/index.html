@@ -134,6 +134,85 @@ limitations under the License.
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Credit Score Section (PROTOTYPE) -->
+    <div class="row col-lg-12 align-items-start mt-4">
+      <div class="col-lg-12">
+        <div class="card cardc">
+          <div class="card-body">
+            <div class="row align-items-start">
+              <div class="col-lg-4">
+                <p class="text-uppercase mb-3">
+                  <b>Bank of Anthos Credit Score</b> <span class="badge badge-info">Prototype</span>
+                </p>
+                <div id="creditScoreSection">
+                  <div class="text-center mb-3">
+                    <span class="h1 mb-0" id="creditScoreValue">
+                      <!-- Credit score will be calculated by JavaScript -->
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="progress mb-3">
+                    <div id="creditScoreProgress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="300" aria-valuemax="850">300</div>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <small>Poor</small>
+                    <small>Fair</small>
+                    <small>Good</small>
+                    <small>Excellent</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <p class="text-uppercase mb-3">
+                  <b>Credit Factors</b>
+                </p>
+                <div id="creditFactors">
+                  <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Account Balance
+                      <span id="balanceFactor" class="badge badge-primary badge-pill">-</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Transaction Frequency
+                      <span id="frequencyFactor" class="badge badge-primary badge-pill">-</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      Deposit Consistency
+                      <span id="depositFactor" class="badge badge-primary badge-pill">-</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <p class="text-uppercase mb-3">
+                  <b>Quick Cash</b>
+                </p>
+                <div id="quickCashEligibility">
+                  <div class="text-center mb-3">
+                    <div id="eligibilityStatus">Calculating eligibility...</div>
+                  </div>
+                  <div id="quickCashOptions" style="display: none;">
+                    <p>You're eligible for:</p>
+                    <button id="requestQuickCash" class="btn btn-success btn-block" onclick="requestQuickCash()">
+                      Request $<span id="quickCashAmount">500</span> Quick Cash
+                    </button>
+                    <small class="text-muted">Funds will be deposited to your account immediately.</small>
+                  </div>
+                  <div id="quickCashIneligible" style="display: none;">
+                    <p class="text-danger">Sorry, you're not eligible for Quick Cash at this time.</p>
+                    <small class="text-muted">Continue building your credit score with regular deposits and account activity.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
       <!-- Transaction History Table -->
       <div class="row col-lg-12 mb-4 align-items-start">
