@@ -680,16 +680,33 @@ def create_app():
             username = token_data['user']
             firstname = token_data['name'].split()[0]  # Get first name from full name
             
+            # Add debug logging
+            app.logger.debug(f"Fetching user data for username: {username}")
+            app.logger.debug(f"Userservice URI: {app.config['USERSERVICE_URI']}")
+            
             # Get user's email from userservice
             hed = {'Authorization': 'Bearer ' + token}
+            userservice_url = f'{app.config["USERSERVICE_URI"]}/{username}'
+            app.logger.debug(f"Making request to: {userservice_url}")
+            
             user_resp = requests.get(
-                url=f'{app.config["USERSERVICE_URI"]}/{username}',
+                url=userservice_url,
                 headers=hed,
                 timeout=app.config['BACKEND_TIMEOUT']
             )
+            
+            # Add response logging
+            if user_resp.status_code != 200:
+                app.logger.error(f"Userservice returned status code: {user_resp.status_code}")
+                app.logger.error(f"Response content: {user_resp.text}")
+                return jsonify({'error': f'Failed to fetch user data: {user_resp.status_code}'}), 500
+                
             user_resp.raise_for_status()
             user_data = user_resp.json()
             user_email = user_data.get('email')
+            
+            # Add debug logging
+            app.logger.debug(f"Retrieved email: {user_email}")
 
             if not user_email:
                 return jsonify({'error': 'No email found for user'}), 400

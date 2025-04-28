@@ -28,7 +28,7 @@ from email.mime.multipart import MIMEMultipart
 
 import bcrypt
 import jwt
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 import bleach
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
@@ -52,6 +52,25 @@ def create_app():
     # as pylint thinks they are unused
     # pylint: disable=unused-variable
 
+
+    def verify_token(token):
+        """
+        Validates token using userservice public key
+        """
+        app.logger.debug('Verifying token.')
+        if token is None:
+            return False
+        try:
+            jwt.decode(algorithms='RS256',
+                       jwt=token,
+                       key=app.config['PUBLIC_KEY'],
+                       options={"verify_signature": True})
+            app.logger.debug('Token verified.')
+            return True
+        except jwt.exceptions.InvalidTokenError as err:
+            app.logger.error('Error validating token: %s', str(err))
+            return False
+        
     def send_welcome_email(username, email, firstname):
         """
         Send a welcome email to a newly registered user
@@ -346,6 +365,36 @@ def create_app():
         except SQLAlchemyError as err:
             app.logger.error('Error logging in: %s', str(err))
             return 'failed to retrieve user information', 500
+
+    @app.route('/users/<username>', methods=['GET'])
+    def get_user(username):
+        """
+        Get user details
+        
+        Returns user details for the specified username if authenticated
+        """
+        if not verify_token(request.headers.get('Authorization')):
+            return abort(401)
+        
+        try:
+            # Get user from database
+            user = users_db.get_user(username)
+            if user is None:
+                return jsonify({'error': 'User not found'}), 404
+                
+            # Return only necessary user data
+            user_data = {
+                'username': user['username'],
+                'email': user['email'],
+                'firstname': user['firstname'],
+                'lastname': user['lastname']
+            }
+            
+            return jsonify(user_data), 200
+            
+        except Exception as e:
+            app.logger.error('Error retrieving user data: %s', str(e))
+            return jsonify({'error': 'Failed to retrieve user data'}), 500
 
     @atexit.register
     def _shutdown():
