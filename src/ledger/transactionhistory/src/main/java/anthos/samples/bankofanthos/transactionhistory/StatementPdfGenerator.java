@@ -16,8 +16,6 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.awt.Color;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 @Service
 public class StatementPdfGenerator {
@@ -32,12 +30,10 @@ public class StatementPdfGenerator {
     private static final PDColor RED_COLOR = new PDColor(new float[]{0.8f, 0.0f, 0.0f}, PDDeviceRGB.INSTANCE);
     private static final PDColor GRAY_COLOR = new PDColor(new float[]{0.5f, 0.5f, 0.5f}, PDDeviceRGB.INSTANCE);
     
-    // Update the TABLE_WIDTHS to better accommodate the balance column
-    private static final float[] TABLE_WIDTHS = {90f, 70f, 130f, 100f, 100f};  // Adjusted widths
+    // Add table constants
+    private static final float[] TABLE_WIDTHS = {100f, 80f, 150f, 100f};  // Column widths
     private static final float TABLE_ROW_HEIGHT = 20f;
     private static final float TABLE_CELL_PADDING = 5f;
-
-    private static final Logger LOGGER = LogManager.getLogger(StatementPdfGenerator.class);
 
     private final String localRoutingNum;
     
@@ -179,7 +175,7 @@ public class StatementPdfGenerator {
             int endIdx = Math.min(startIdx + transactionsPerPage, totalTransactions);
             List<Transaction> pageTransactions = transactions.subList(startIdx, endIdx);
             
-            addTransactionsToPage(document, page, pageTransactions, statement.getAccountId(), pageNum, statement);
+            addTransactionsToPage(document, page, pageTransactions, statement.getAccountId(), pageNum);
         }
         
         // Add summary to the last page
@@ -188,7 +184,7 @@ public class StatementPdfGenerator {
     }
     
     private void addTransactionsToPage(PDDocument document, PDPage page, List<Transaction> transactions, 
-                                      String accountId, int pageNum, BankStatement statement) throws IOException {
+                                      String accountId, int pageNum) throws IOException {
         try (PDPageContentStream content = new PDPageContentStream(document, page, 
                 PDPageContentStream.AppendMode.APPEND, true, true)) {
             
@@ -209,7 +205,7 @@ public class StatementPdfGenerator {
             }
 
             // Draw table headers
-            String[] headers = {"Date", "Type", "Account", "Amount", "Balance"};
+            String[] headers = {"Date", "Type", "Account", "Amount"};
             float currentX = tableStartX;
             for (int i = 0; i < headers.length; i++) {
                 drawTableCell(content, currentX, y, TABLE_WIDTHS[i], TABLE_ROW_HEIGHT, 
@@ -218,15 +214,10 @@ public class StatementPdfGenerator {
             }
             y -= TABLE_ROW_HEIGHT;
 
-            // Add this near the top of addTransactionsToPage method:
-            double runningBalance = statement.getOpeningBalance() / 100.0;
-
             // Draw transaction rows
             for (Transaction txn : transactions) {
                 currentX = tableStartX;
-                // Update the isCredit check to also verify routing numbers:
-                boolean isCredit = txn.getToAccountNum().equals(accountId) && 
-                                  txn.getToRoutingNum().equals(localRoutingNum);
+                boolean isCredit = txn.getToAccountNum().equals(accountId);
                 PDColor amountColor = isCredit ? GREEN_COLOR : RED_COLOR;
                 
                 // Date
@@ -250,34 +241,11 @@ public class StatementPdfGenerator {
                 currentX += TABLE_WIDTHS[2];
                 
                 // Amount
-                String formattedAmount;
-                if (isCredit) {
-                    formattedAmount = "+" + MONEY_FORMAT.format(txn.getAmount() / 100.0);
-                } else {
-                    formattedAmount = "-" + MONEY_FORMAT.format(Math.abs(txn.getAmount()) / 100.0);
-                }
+                String prefix = isCredit ? "+" : "-";
+                String amount = prefix + MONEY_FORMAT.format(Math.abs(txn.getAmount()) / 100.0);
                 drawTableCell(content, currentX, y, TABLE_WIDTHS[3], TABLE_ROW_HEIGHT, 
-                             formattedAmount, false, amountColor);
+                             amount, false, amountColor);
                 
-                // Then inside the transaction loop, add a balance column:
-                if (isCredit) {
-                    runningBalance += txn.getAmount() / 100.0;
-                } else {
-                    runningBalance -= txn.getAmount() / 100.0;
-                }
-
-                // Add balance column to show running total
-                float balanceX = currentX + TABLE_WIDTHS[3];
-                drawTableCell(content, balanceX, y, TABLE_WIDTHS[3], TABLE_ROW_HEIGHT,
-                             MONEY_FORMAT.format(runningBalance), false, null);
-
-                // Add inside the transaction loop:
-                LOGGER.debug("Processing transaction: ID={}, Amount={}, isCredit={}, Balance={}",
-                    txn.getTransactionId(),
-                    txn.getAmount(),
-                    isCredit,
-                    runningBalance);
-
                 y -= TABLE_ROW_HEIGHT;
             }
 

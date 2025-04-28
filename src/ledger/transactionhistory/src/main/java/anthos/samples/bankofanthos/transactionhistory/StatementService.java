@@ -41,20 +41,11 @@ public class StatementService {
         Long totalDeposits = 0L; // Initialize total deposits to 0
         Long totalWithdrawals = 0L; // Initialize total withdrawals to 0
 
-        // Replace the existing transaction calculation loop with this:
         for (Transaction transaction : transactions) {
-            if (transaction.getToAccountNum().equals(accountId) && 
-                transaction.getToRoutingNum().equals(routingNum)) {
-                // This is a deposit/credit to the account
+            if (transaction.getToAccountNum().equals(accountId)) {
                 totalDeposits += transaction.getAmount();
-                LOGGER.debug("Added deposit: {} for transaction {}", 
-                            transaction.getAmount(), transaction.getTransactionId());
-            } else if (transaction.getFromAccountNum().equals(accountId) && 
-                       transaction.getFromRoutingNum().equals(routingNum)) {
-                // This is a withdrawal/debit from the account
+            } else {
                 totalWithdrawals += transaction.getAmount();
-                LOGGER.debug("Added withdrawal: {} for transaction {}", 
-                            transaction.getAmount(), transaction.getTransactionId());
             }
         }
         LOGGER.debug("Total deposits: {}, Total withdrawals: {}", 
