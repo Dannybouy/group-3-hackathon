@@ -64,13 +64,14 @@ public interface TransactionRepository
     /*
     getBalanceAsOf: used to fetch the balance of an account as of a specific date.
     */
-    @Query(value = "SELECT " +
-           "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
-           "WHERE TO_ACCT = ?1 AND TO_ROUTE = ?2 " +
-           "AND TIMESTAMP <= ?3) - " +
-           "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
-           "WHERE FROM_ACCT = ?1 AND FROM_ROUTE = ?2 " +
-           "AND TIMESTAMP <= ?3)",
-           nativeQuery = true)
+    @Query(value = 
+        "SELECT " +
+        "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
+        "WHERE TO_ACCT = ?1 AND TO_ROUTE = ?2 " +
+        "AND TIMESTAMP <= ?3 + INTERVAL '1' DAY - INTERVAL '1' SECOND) - " +
+        "(SELECT COALESCE(SUM(AMOUNT), 0) FROM TRANSACTIONS " +
+        "WHERE FROM_ACCT = ?1 AND FROM_ROUTE = ?2 " +
+        "AND TIMESTAMP <= ?3 + INTERVAL '1' DAY - INTERVAL '1' SECOND)",
+        nativeQuery = true)
     Long getBalanceAsOf(String accountNum, String routingNum, Date date);
 }
