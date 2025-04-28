@@ -148,17 +148,18 @@ limitations under the License.
                 </p>
                 <div id="creditScoreSection">
                   <div class="text-center mb-3">
-                    <span class="h1 mb-0" id="creditScoreValue">
+                    <div id="creditScoreValue" class="mb-0">
                       <!-- Credit score will be calculated by JavaScript -->
                       <div class="spinner-border text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                       </div>
-                    </span>
+                    </div>
+                    <div class="mt-2 score-label">Your Credit Score</div>
                   </div>
                   <div class="progress mb-3">
                     <div id="creditScoreProgress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="300" aria-valuemax="850">300</div>
                   </div>
-                  <div class="d-flex justify-content-between">
+                  <div class="d-flex justify-content-between score-range-labels">
                     <small>Poor</small>
                     <small>Fair</small>
                     <small>Good</small>
@@ -200,7 +201,7 @@ limitations under the License.
                     <button id="requestQuickCash" class="btn btn-success btn-block" onclick="requestQuickCash()">
                       Request $<span id="quickCashAmount">500</span> Quick Cash
                     </button>
-                    <small class="text-muted">Funds will be deposited to your account immediately.</small>
+                    <small class="text-muted" style="font-size: 0.8rem;">Funds will be deposited to your account immediately.</small>
                   </div>
                   <div id="quickCashIneligible" style="display: none;">
                     <p class="text-danger">Sorry, you're not eligible for Quick Cash at this time.</p>

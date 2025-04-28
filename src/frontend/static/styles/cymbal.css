@@ -551,18 +551,22 @@ input {
 /* Credit Score Prototype Styles */
 #creditScoreSection {
   text-align: center;
+  padding: 10px 0;
 }
 
 #creditScoreValue {
   font-size: 3rem;
   font-weight: bold;
   color: #1976d2;
+  margin: 15px 0;
+  display: block;
 }
 
 .progress {
   height: 1.5rem;
   border-radius: 0.75rem;
   background-color: #e9ecef;
+  margin: 15px 0;
 }
 
 .progress-bar {
@@ -573,24 +577,116 @@ input {
 #creditFactors .list-group-item {
   background-color: transparent;
   border-color: rgba(0, 0, 0, 0.125);
+  padding: 12px 20px;
 }
 
 #quickCashEligibility {
   text-align: center;
+  padding: 10px 0;
 }
 
 #quickCashOptions {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 #requestQuickCash {
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 10px 15px;
 }
 
 #eligibilityStatus {
   font-weight: 500;
   min-height: 24px;
+  margin: 10px 0;
+}
+
+/* Add more padding to the credit score card section */
+.row.col-lg-12.align-items-start.mt-4 .card-body {
+  padding: 2rem 1.5rem;
+}
+
+/* Add spacing between credit factors */
+#creditFactors .list-group {
+  margin-top: 15px;
+}
+
+/* Add padding to the score section elements */
+.col-lg-4 > p.text-uppercase.mb-3 {
+  margin-bottom: 1.2rem !important;
+  padding-bottom: 0.5rem;
+}
+
+/* Add spacing between the credit score sections */
+.row.col-lg-12.align-items-start.mt-4 .col-lg-4 {
+  padding: 0 1.25rem;
+}
+
+/* Enhanced styling for the credit score card */
+.row.col-lg-12.align-items-start.mt-4 .card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease;
+}
+
+/* Add a subtle hover effect */
+.row.col-lg-12.align-items-start.mt-4 .card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+/* Make credit score more prominent */
+#creditScoreValue {
+  position: relative;
+  margin: 20px auto;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 60px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Credit factors section styling */
+#creditFactors .list-group-item {
+  margin-bottom: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+#creditFactors .list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Factor badges styling */
+#creditFactors .badge {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Quick Cash button enhancement */
+#requestQuickCash {
+  transition: all 0.3s ease;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+}
+
+#requestQuickCash:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode specific enhancements */
+body[style*="background-color: #111"] #creditScoreValue {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body[style*="background-color: #111"] #creditFactors .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Dark mode compatibility */
@@ -601,4 +697,140 @@ body[style*="background-color: #111"] #creditFactors .list-group-item {
 
 body[style*="background-color: #111"] #creditScoreValue {
   color: #64b5f6;
+}
+
+/* Additional Dark Mode Compatibility Styles */
+
+/* Modal styling in dark mode */
+body[style*="background-color: #111"] .modal-content {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .modal-title,
+body[style*="background-color: #111"] .modal-body label,
+body[style*="background-color: #111"] .modal-body .text-uppercase {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .modal-content select,
+body[style*="background-color: #111"] .modal-content input,
+body[style*="background-color: #111"] .modal-content textarea {
+  background-color: #444 !important;
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+body[style*="background-color: #111"] .modal-content select option {
+  background-color: #444;
+  color: #fff;
+}
+
+body[style*="background-color: #111"] .close span {
+  color: #fff !important;
+}
+
+/* Transaction table styling in dark mode */
+body[style*="background-color: #111"] .transaction-account,
+body[style*="background-color: #111"] .transaction-label,
+body[style*="background-color: #111"] .transaction-type,
+body[style*="background-color: #111"] .transaction-date,
+body[style*="background-color: #111"] .transaction-label-none {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .table {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .table thead th {
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+body[style*="background-color: #111"] .table-sm td, 
+body[style*="background-color: #111"] .table-sm th {
+  border-color: #444 !important;
+}
+
+/* Form controls in dark mode */
+body[style*="background-color: #111"] .custom-select {
+  background-color: #444 !important;
+  color: #fff !important;
+  border-color: #666 !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23ffffff' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") !important;
+}
+
+body[style*="background-color: #111"] .form-control:focus {
+  background-color: #444 !important;
+  border-color: #A3FD8C !important;
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .input-group-text {
+  background-color: #444 !important;
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+/* Fixing specific form control elements in dark mode */
+body[style*="background-color: #111"] .form-control {
+  background-color: #444 !important;
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+body[style*="background-color: #111"] .modal-content .secondary-text {
+  color: #ddd !important;
+}
+
+body[style*="background-color: #111"] .modal-body label[style*="color: #444"] {
+  color: #ddd !important;
+}
+
+/* Fix for amount inputs in dark mode */
+body[style*="background-color: #111"] .amount-font {
+  color: #fff !important;
+}
+
+/* Fix for dropdown selects in dark mode */
+body[style*="background-color: #111"] .dropdown-menu {
+  background-color: #444 !important;
+  color: #fff !important;
+  border-color: #666 !important;
+}
+
+body[style*="background-color: #111"] .dropdown-item {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .dropdown-item:hover,
+body[style*="background-color: #111"] .dropdown-item:focus {
+  background-color: #555 !important;
+}
+
+/* Additional score styling */
+.score-label {
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.score-range-labels {
+  padding: 0 10px;
+}
+
+.score-range-labels small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Dark mode compatibility for new elements */
+body[style*="background-color: #111"] .score-label {
+  color: #ccc;
+}
+
+body[style*="background-color: #111"] .score-range-labels small {
+  color: #ccc;
 }
