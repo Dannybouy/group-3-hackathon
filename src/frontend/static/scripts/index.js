@@ -101,6 +101,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
         headings?.forEach(e => e.style.setProperty("color", "#333", "important"))
         credit?.forEach(e => e.style.setProperty("color", "#008A20", "important")) 
         debit?.forEach(e => e.style.setProperty("color", "#FF0000", "important")) 
+        
+        // Reset modal headings and content to light mode
+        document.querySelectorAll('.modal-title').forEach(el => el.style.setProperty("color", "#343434", "important"));
+        document.querySelectorAll('.modal-content').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
+        document.querySelectorAll('.modal label').forEach(el => el.style.setProperty("color", "#444", "important"));
+        document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#444", "important"));
+        document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#333", "important"));
+        
+        // Transaction table text
+        document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#333", "important"));
+        
         mode.innerText = "dark_mode"
         localStorage.setItem('mode', "light_mode")
         console.log("Switching to light");
@@ -120,6 +131,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
         headings?.forEach(e => e.style.setProperty("color", "#fff", "important"))
         credit?.forEach(e => e.style.setProperty("color", "#008A20", "important"))
         debit?.forEach(e => e.style.setProperty("color", "#FF0000", "important"))
+        
+        // Set modal headings and content to dark mode
+        document.querySelectorAll('.modal-title').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        document.querySelectorAll('.modal-content').forEach(el => el.style.setProperty("background-color", "#333", "important")); 
+        document.querySelectorAll('.modal label').forEach(el => el.style.setProperty("color", "#eee", "important"));
+        document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#eee", "important"));
+        document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        
+        // Transaction table text
+        document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        
         mode.innerText = "light_mode"
         localStorage.setItem('mode', "dark_mode")
         console.log("Switching to dark");
@@ -247,6 +269,31 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
   // --- End Generate PDF Statement Logic ---
 
+  // --- Dark Mode Modal Fix ---
+  // Apply dark mode styling when modals are opened
+  $('#depositFunds, #sendPayment, #statementModal').on('show.bs.modal', function() {
+    // Check if dark mode is active
+    if (localStorage.getItem('mode') === 'dark_mode') {
+      const modal = $(this);
+      modal.find('.modal-content').css('background-color', '#333');
+      modal.find('.modal-title').css('color', '#fff');
+      modal.find('label').css('color', '#eee');
+      modal.find('.text-muted, .text-uppercase').css('color', '#eee');
+      modal.find('select, input').css({
+        'background-color': '#444',
+        'color': '#fff',
+        'border-color': '#666'
+      });
+      modal.find('.close span').css('color', '#fff');
+      modal.find('.input-group-text').css({
+        'background-color': '#444',
+        'color': '#fff',
+        'border-color': '#666'
+      });
+    }
+  });
+  // --- End Dark Mode Modal Fix ---
+
   // --- Credit Score Prototype Logic ---
   // Get transaction history from the table
   function calculateCreditScore() {
@@ -312,6 +359,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
     
     // Update the credit score display
     const creditScoreElement = document.getElementById('creditScoreValue');
+    // Remove any existing spinner
+    const existingSpinner = creditScoreElement.querySelector('.spinner-border');
+    if (existingSpinner) {
+      existingSpinner.remove();
+    }
     creditScoreElement.textContent = finalScore;
     
     // Update the progress bar
@@ -320,16 +372,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
     progressBar.style.width = `${percentage}%`;
     progressBar.setAttribute('aria-valuenow', finalScore);
     
-    // Set color based on score range
+    // Set color based on score range for both progress bar and score display
+    let colorClass, colorHex;
     if (finalScore < 580) {
-      progressBar.classList.add('bg-danger');
+      colorClass = 'bg-danger';
+      colorHex = '#dc3545'; // Red
     } else if (finalScore < 670) {
-      progressBar.classList.add('bg-warning');
+      colorClass = 'bg-warning';
+      colorHex = '#ffc107'; // Yellow
     } else if (finalScore < 740) {
-      progressBar.classList.add('bg-info');
+      colorClass = 'bg-info';
+      colorHex = '#17a2b8'; // Blue
     } else {
-      progressBar.classList.add('bg-success');
+      colorClass = 'bg-success';
+      colorHex = '#28a745'; // Green
     }
+    
+    // Apply colors
+    progressBar.className = 'progress-bar ' + colorClass;
+    creditScoreElement.style.color = colorHex;
+    creditScoreElement.style.borderBottom = `4px solid ${colorHex}`;
     
     // Update Quick Cash eligibility
     updateQuickCashEligibility(finalScore, currentBalance);
