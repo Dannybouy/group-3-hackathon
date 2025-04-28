@@ -247,6 +247,229 @@ document.addEventListener("DOMContentLoaded", function(event) {
   });
   // --- End Generate PDF Statement Logic ---
 
+  // --- Credit Score Prototype Logic ---
+  // Get transaction history from the table
+  function calculateCreditScore() {
+    console.log('Calculating credit score...');
+    
+    // Get transaction data from the transaction table
+    const transactionRows = document.querySelectorAll('#transaction-list tr');
+    const currentBalance = parseFloat(document.getElementById('current-balance').textContent.replace(/[$,]/g, ''));
+    
+    // If we don't have transactions or balance data yet, retry after a delay
+    if (transactionRows.length === 0 || isNaN(currentBalance)) {
+      console.log('Transaction data not loaded yet, retrying...');
+      setTimeout(calculateCreditScore, 500);
+      return;
+    }
+
+    // Get the last 3 months worth of transactions
+    const transactions = [];
+    const transactionTypes = { CREDIT: [], DEBIT: [] };
+    
+    transactionRows.forEach(row => {
+      const dateElement = row.querySelector('.transaction-date p');
+      const typeElement = row.querySelector('.transaction-type');
+      const amountElement = row.querySelector('.transaction-amount');
+      
+      if (dateElement && typeElement && amountElement) {
+        const type = typeElement.textContent.trim().includes('Credit') ? 'CREDIT' : 'DEBIT';
+        const amount = parseFloat(amountElement.textContent.replace(/[+$,]/g, '').replace(/[-]/g, ''));
+        
+        transactions.push({ type, amount });
+        transactionTypes[type].push(amount);
+      }
+    });
+
+    console.log(`Analyzed ${transactions.length} transactions`);
+    
+    // Calculate credit factors
+    const creditFactors = {
+      // Balance factor: Score higher for higher balances, max score at $10,000+
+      balance: Math.min(Math.floor(currentBalance / 100), 100),
+      
+      // Transaction frequency: Score higher for more transactions
+      frequency: Math.min(Math.floor(transactions.length * 5), 100),
+      
+      // Deposit consistency: Score based on regular deposits 
+      depositConsistency: calculateDepositConsistencyScore(transactionTypes.CREDIT)
+    };
+    
+    // Update the UI with factor scores
+    document.getElementById('balanceFactor').textContent = creditFactors.balance + '/100';
+    document.getElementById('frequencyFactor').textContent = creditFactors.frequency + '/100';
+    document.getElementById('depositFactor').textContent = creditFactors.depositConsistency + '/100';
+    
+    // Calculate the final score (300-850 range, like FICO)
+    const weightedScore = (
+      (creditFactors.balance * 0.4) + 
+      (creditFactors.frequency * 0.3) + 
+      (creditFactors.depositConsistency * 0.3)
+    );
+    
+    // Map the 0-100 weighted score to 300-850 range
+    const finalScore = Math.floor(300 + (weightedScore * 5.5));
+    
+    // Update the credit score display
+    const creditScoreElement = document.getElementById('creditScoreValue');
+    creditScoreElement.textContent = finalScore;
+    
+    // Update the progress bar
+    const progressBar = document.getElementById('creditScoreProgress');
+    const percentage = ((finalScore - 300) / (850 - 300)) * 100;
+    progressBar.style.width = `${percentage}%`;
+    progressBar.setAttribute('aria-valuenow', finalScore);
+    
+    // Set color based on score range
+    if (finalScore < 580) {
+      progressBar.classList.add('bg-danger');
+    } else if (finalScore < 670) {
+      progressBar.classList.add('bg-warning');
+    } else if (finalScore < 740) {
+      progressBar.classList.add('bg-info');
+    } else {
+      progressBar.classList.add('bg-success');
+    }
+    
+    // Update Quick Cash eligibility
+    updateQuickCashEligibility(finalScore, currentBalance);
+  }
+  
+  // Helper function to calculate deposit consistency score
+  function calculateDepositConsistencyScore(creditTransactions) {
+    if (creditTransactions.length < 2) {
+      return 30; // Base score for few transactions
+    }
+    
+    // Sort credit transactions by amount (descending)
+    const sortedDeposits = [...creditTransactions].sort((a, b) => b - a);
+    
+    // Look for recurring deposits of similar amounts
+    let regularDeposits = 0;
+    
+    for (let i = 0; i < sortedDeposits.length - 1; i++) {
+      const current = sortedDeposits[i];
+      const next = sortedDeposits[i + 1];
+      
+      // If amounts are within 10% of each other, consider it a regular deposit
+      if (Math.abs(current - next) / current < 0.1) {
+        regularDeposits++;
+      }
+    }
+    
+    // Score based on percentage of regular deposits
+    const regularityScore = Math.min(
+      Math.floor((regularDeposits / (sortedDeposits.length - 1)) * 100), 
+      100
+    );
+    
+    return Math.max(30, regularityScore); // Minimum of 30 points
+  }
+  
+  // Update Quick Cash eligibility UI
+  function updateQuickCashEligibility(score, balance) {
+    const eligibilityStatus = document.getElementById('eligibilityStatus');
+    const quickCashOptions = document.getElementById('quickCashOptions');
+    const quickCashIneligible = document.getElementById('quickCashIneligible');
+    const quickCashAmount = document.getElementById('quickCashAmount');
+    
+    // Clear loading status
+    eligibilityStatus.textContent = '';
+    
+    // Determine eligibility (score >= 630 and balance >= $200)
+    const isEligible = score >= 630 && balance >= 200;
+    
+    if (isEligible) {
+      quickCashOptions.style.display = 'block';
+      quickCashIneligible.style.display = 'none';
+      
+      // Calculate Quick Cash amount based on score and balance
+      let amount = 500; // Default
+      
+      if (score >= 750) {
+        amount = Math.min(Math.floor(balance * 0.5), 5000);
+      } else if (score >= 700) {
+        amount = Math.min(Math.floor(balance * 0.3), 2500);
+      } else if (score >= 650) {
+        amount = Math.min(Math.floor(balance * 0.2), 1000);
+      }
+      
+      // Round to nearest 100
+      amount = Math.floor(amount / 100) * 100;
+      quickCashAmount.textContent = amount;
+    } else {
+      quickCashOptions.style.display = 'none';
+      quickCashIneligible.style.display = 'block';
+    }
+  }
+  
+  // Mock function for Quick Cash request
+  window.requestQuickCash = function() {
+    const amount = document.getElementById('quickCashAmount').textContent;
+    
+    // Show a small loading state
+    const button = document.getElementById('requestQuickCash');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+    button.disabled = true;
+    
+    // Simulate API request delay
+    setTimeout(() => {
+      // Create success message alert
+      const alertContainer = document.createElement('div');
+      alertContainer.classList.add('row', 'col-lg-12', 'align-items-start');
+      alertContainer.id = 'quick-cash-alert';
+      
+      const alertHTML = `
+        <div class="col-lg">
+          <div class="card snackbar-card">
+            <div class="card-body snackbar-body">
+              <div class="row align-items-center">
+                <div class="col">
+                  <h5 class="alert-message-container">
+                    <div class="check-mark-container">
+                      <span class="snackbar-close material-icons">check_circle</span>
+                    </div>
+                    Your Quick Cash request for $${amount} has been approved and deposited to your account!
+                  </h5>
+                </div>
+                <div class="button-icon col-auto">
+                  <span class="snackbar-close material-icons" onclick="document.getElementById('quick-cash-alert').remove();">close</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      alertContainer.innerHTML = alertHTML;
+      
+      // Add to top of page
+      const mainContent = document.querySelector('main.container');
+      mainContent.insertBefore(alertContainer, mainContent.firstChild);
+      
+      // Reset button
+      button.innerHTML = originalText;
+      button.disabled = false;
+      
+      // Optionally, update the balance to simulate receiving funds
+      const currentBalanceEl = document.getElementById('current-balance');
+      const currentBalance = parseFloat(currentBalanceEl.textContent.replace(/[$,]/g, ''));
+      const newBalance = currentBalance + parseInt(amount);
+      
+      // Format with dollar sign and commas
+      currentBalanceEl.textContent = '$' + newBalance.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      
+    }, 2000);
+  };
+  
+  // Call the function to calculate credit score
+  setTimeout(calculateCreditScore, 1000);
+  // --- End Credit Score Prototype Logic ---
+
 });
 
 // --- Send Statement by Email Logic ---
