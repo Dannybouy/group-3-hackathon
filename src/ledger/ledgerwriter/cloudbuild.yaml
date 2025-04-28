@@ -2,7 +2,7 @@ substitutions:
   _REGION: 'us-central1'
   _REPO: 'ledger-repo'
   _CLUSTER: 'dreamdev-team3-cluster'
-  _CLUSTER_REGION: 'us-east1'
+  _CLUSTER_ZONE: 'us-east1-b'
   _NAMESPACE: 'default'
   _SERVICE_NAME: 'ledgerwriter'
   _CONTAINER_NAME: 'ledgerwriter'
@@ -25,13 +25,13 @@ steps:
       - -c
       - |
         gcloud container clusters get-credentials $_CLUSTER \
-          --region $_CLUSTER_REGION \
+          --zone $_CLUSTER_ZONE \
           --project $PROJECT_ID
 
   # 3) roll out new image
   - name: gcr.io/cloud-builders/kubectl
     env:
-      - 'CLOUDSDK_COMPUTE_REGION=$_CLUSTER_REGION'
+      - 'CLOUDSDK_COMPUTE_ZONE=$_CLUSTER_ZONE'
       - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
     args:
       - set
