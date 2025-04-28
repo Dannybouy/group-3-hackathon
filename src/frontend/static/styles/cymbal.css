@@ -834,3 +834,72 @@ body[style*="background-color: #111"] .score-label {
 body[style*="background-color: #111"] .score-range-labels small {
   color: #ccc;
 }
+
+/* Enhanced transaction table styling for dark mode */
+body[style*="background-color: #111"] .card-table-header {
+  background-color: #222 !important;
+}
+
+body[style*="background-color: #111"] .table-responsive {
+  background-color: #222 !important;
+}
+
+body[style*="background-color: #111"] .card-table {
+  background-color: #222 !important;
+}
+
+body[style*="background-color: #111"] .table-sm tbody tr {
+  background-color: #2a2a2a !important;
+}
+
+body[style*="background-color: #111"] .table-sm tbody tr:nth-child(odd) {
+  background-color: #333 !important;
+}
+
+body[style*="background-color: #111"] .table-sm tbody tr:hover {
+  background-color: #444 !important;
+}
+
+body[style*="background-color: #111"] .table-sm tbody td {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .transaction-date p {
+  color: #fff !important;
+}
+
+body[style*="background-color: #111"] .transaction-amount {
+  font-weight: 500;
+}
+
+/* Transaction history card specific styling for dark mode */
+body[style*="background-color: #111"] #transaction-table {
+  background-color: #222 !important;
+}
+
+body[style*="background-color: #111"] .card-header-title {
+  color: #fff !important;
+}
+
+/* Fix specific text colors that might still be problematic */
+body[style*="background-color: #111"] td,
+body[style*="background-color: #111"] th,
+body[style*="background-color: #111"] p {
+  color: #fff !important;
+}
+
+/* Ensure transaction types are properly colored */
+body[style*="background-color: #111"] .transaction-type {
+  color: #fff !important;
+}
+
+/* Keep the credit/debit colors as they are */
+body[style*="background-color: #111"] .transaction-amount-credit {
+  color: #008A20 !important;
+  font-weight: 600;
+}
+
+body[style*="background-color: #111"] .transaction-amount-debit {
+  color: #FF0000 !important;
+  font-weight: 600;
+}

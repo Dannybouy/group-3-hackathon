@@ -109,8 +109,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#444", "important"));
         document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#333", "important"));
         
-        // Transaction table text
+        // Transaction table text in light mode
         document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#333", "important"));
+        document.querySelectorAll('.transaction-date p').forEach(el => el.style.setProperty("color", "#333", "important"));
+        document.querySelectorAll('.transaction-label-none').forEach(el => el.style.setProperty("color", "#333", "important"));
+        document.querySelectorAll('.table-responsive').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
+        document.querySelectorAll('.card-table').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
+        document.querySelectorAll('.table-sm tbody tr').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
         
         mode.innerText = "dark_mode"
         localStorage.setItem('mode', "light_mode")
@@ -139,8 +144,16 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#eee", "important"));
         document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#fff", "important"));
         
-        // Transaction table text
+        // Transaction table text in dark mode
         document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        document.querySelectorAll('.transaction-date p').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        document.querySelectorAll('.transaction-label-none').forEach(el => el.style.setProperty("color", "#fff", "important"));
+        document.querySelectorAll('.card-table-header').forEach(el => el.style.setProperty("background-color", "#222", "important"));
+        document.querySelectorAll('.table-responsive').forEach(el => el.style.setProperty("background-color", "#222", "important"));
+        document.querySelectorAll('.card-table').forEach(el => el.style.setProperty("background-color", "#222", "important"));
+        
+        // Apply alternating row colors
+        applyTransactionTableDarkMode();
         
         mode.innerText = "light_mode"
         localStorage.setItem('mode', "dark_mode")
@@ -151,6 +164,43 @@ document.addEventListener("DOMContentLoaded", function(event) {
   modeChange();
   document.getElementById("mode").addEventListener("click", modeChange)
 
+  // Function to apply alternating row colors to transaction table in dark mode
+  function applyTransactionTableDarkMode() {
+    if (localStorage.getItem('mode') === 'dark_mode') {
+      // Get all transaction rows
+      const transactionRows = document.querySelectorAll('.table-sm tbody tr');
+      // Apply alternating colors
+      transactionRows.forEach((row, index) => {
+        if (index % 2 === 0) {
+          row.style.setProperty("background-color", "#2a2a2a", "important");
+        } else {
+          row.style.setProperty("background-color", "#333", "important");
+        }
+        // Ensure text is white in all cells
+        row.querySelectorAll('td').forEach(cell => {
+          cell.style.setProperty("color", "#fff", "important");
+        });
+      });
+      
+      // Ensure transaction type icons maintain visibility
+      document.querySelectorAll('.transaction-type').forEach(el => {
+        el.style.setProperty("color", "#fff", "important");
+      });
+      
+      // Ensure transaction labels are visible
+      document.querySelectorAll('.transaction-label, .transaction-account').forEach(el => {
+        el.style.setProperty("color", "#fff", "important");
+      });
+    }
+  }
+  
+  // Apply dark mode styling to transaction table after page load
+  setTimeout(applyTransactionTableDarkMode, 500);
+  
+  // Also apply after any mode change
+  document.getElementById("mode").addEventListener("click", function() {
+    setTimeout(applyTransactionTableDarkMode, 100);
+  });
 
   function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
