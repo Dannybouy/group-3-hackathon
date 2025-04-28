@@ -1,7 +1,8 @@
 substitutions:
   _REGION: 'us-central1'
   _REPO: 'ledger-repo'
-  _CLUSTER: 'bank-of-anthos'
+  _CLUSTER: 'dreamdev-team3-cluster'
+  _CLUSTER_REGION: 'us-east1'
   _NAMESPACE: 'default'
   _SERVICE_NAME: 'transactionhistory'
   _CONTAINER_NAME: 'transactionhistory'
@@ -24,13 +25,13 @@ steps:
       - -c
       - |
         gcloud container clusters get-credentials $_CLUSTER \
-          --region $_REGION \
+          --region $_CLUSTER_REGION \
           --project $PROJECT_ID
 
   # 3) roll out new image
   - name: gcr.io/cloud-builders/kubectl
     env:
-      - 'CLOUDSDK_COMPUTE_REGION=$_REGION'
+      - 'CLOUDSDK_COMPUTE_REGION=$_CLUSTER_REGION'
       - 'CLOUDSDK_CONTAINER_CLUSTER=$_CLUSTER'
     args:
       - set
