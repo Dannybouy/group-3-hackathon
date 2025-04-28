@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.awt.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +24,8 @@ public class StatementPdfGenerator {
     
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 15;
-    private static final DecimalFormat MONEY_FORMAT = (DecimalFormat) DecimalFormat.getCurrencyInstance();
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+    private static final DecimalFormat MONEY_FORMAT = new DecimalFormat("$#,##0.00");
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     
     // Add color constants
     private static final PDColor GREEN_COLOR = new PDColor(new float[]{0.0f, 0.5f, 0.0f}, PDDeviceRGB.INSTANCE);
@@ -48,21 +47,24 @@ public class StatementPdfGenerator {
     }
     
     public byte[] generatePdf(BankStatement statement) throws IOException {
-        try (PDDocument document = new PDDocument()) {
+        PDDocument document = new PDDocument();
+        try {
             // Create first page and add content
             PDPage firstPage = new PDPage();
             document.addPage(firstPage);
-
+            
             // Add header and summary information to first page
             addHeaderAndSummary(document, firstPage, statement);
-
+            
             // Split transactions into pages and add them
             addTransactionsPages(document, statement);
-
+            
             // Save to byte array
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             document.save(baos);
             return baos.toByteArray();
+        } finally {
+            document.close();
         }
     }
     
@@ -157,8 +159,7 @@ public class StatementPdfGenerator {
     
     private void addTransactionsPages(PDDocument document, BankStatement statement) throws IOException {
         List<Transaction> transactions = statement.getTransactions();
-        PDPage tempPage = new PDPage();
-        int transactionsPerPage = (int) ((tempPage.getMediaBox().getHeight() - (MARGIN * 2)) / TABLE_ROW_HEIGHT) - 5;
+        int transactionsPerPage = 25;
         int totalTransactions = transactions.size();
         int pageCount = (int) Math.ceil((double) totalTransactions / transactionsPerPage);
         
@@ -249,7 +250,12 @@ public class StatementPdfGenerator {
                 currentX += TABLE_WIDTHS[2];
                 
                 // Amount
-                String formattedAmount = formatTransactionAmount(txn, isCredit);
+                String formattedAmount;
+                if (isCredit) {
+                    formattedAmount = "+" + MONEY_FORMAT.format(txn.getAmount() / 100.0);
+                } else {
+                    formattedAmount = "-" + MONEY_FORMAT.format(Math.abs(txn.getAmount()) / 100.0);
+                }
                 drawTableCell(content, currentX, y, TABLE_WIDTHS[3], TABLE_ROW_HEIGHT, 
                              formattedAmount, false, amountColor);
                 
@@ -351,10 +357,5 @@ public class StatementPdfGenerator {
         
         // Reset color
         content.setNonStrokingColor(Color.BLACK);
-    }
-
-    private String formatTransactionAmount(Transaction txn, boolean isCredit) {
-        double amount = Math.abs(txn.getAmount()) / 100.0;
-        return (isCredit ? "+" : "-") + MONEY_FORMAT.format(amount);
     }
 }
