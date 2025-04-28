@@ -1,4 +1,3 @@
-
 # Cloud SQL + Bank of Anthos
 
 This directory contains instructions and Kubernetes manifests for overriding the default in-cluster PostgreSQL databases (`accountsdb` + `ledgerdb`) with Google Cloud SQL.
@@ -10,7 +9,6 @@ For a multicluster/multi-region setup, see [this doc](multi-region.md) for instr
 ## How it works
 
 The setup scripts provided will provision a Cloud SQL instance in your Google Cloud Project. The script will then create two databases - one for the **accounts DB**, one for the **ledger DB**. This replaces the two separate PostgreSQL StatefulSets used in Bank of Anthos by default.
-
 
 ## Setup
 
