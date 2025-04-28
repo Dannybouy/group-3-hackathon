@@ -373,28 +373,33 @@ def create_app():
         
         Returns user details for the specified username if authenticated
         """
-        if not verify_token(request.headers.get('Authorization')):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            app.logger.error("Invalid Authorization header format")
+            return abort(401)
+        
+        if not verify_token(auth_header.split(" ")[1]):
+            app.logger.error("Authorization failed: Missing or invalid token")
             return abort(401)
         
         try:
-            # Get user from database
             user = users_db.get_user(username)
             if user is None:
+                app.logger.warning(f"User not found: {username}")
                 return jsonify({'error': 'User not found'}), 404
+        except Exception as db_err:
+            app.logger.error(f"Database error: {str(db_err)}")
+            return jsonify({'error': 'Database error occurred'}), 500
                 
-            # Return only necessary user data
-            user_data = {
-                'username': user['username'],
-                'email': user['email'],
-                'firstname': user['firstname'],
-                'lastname': user['lastname']
-            }
-            
-            return jsonify(user_data), 200
-            
-        except Exception as e:
-            app.logger.error('Error retrieving user data: %s', str(e))
-            return jsonify({'error': 'Failed to retrieve user data'}), 500
+        # Return only necessary user data
+        user_data = {
+            'username': user['username'],
+            'email': user['email'],
+            'firstname': user['firstname'],
+            'lastname': user['lastname']
+        }
+        
+        return jsonify(user_data), 200
 
     @atexit.register
     def _shutdown():

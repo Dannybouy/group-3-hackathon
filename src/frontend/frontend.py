@@ -670,6 +670,9 @@ def create_app():
 
     @app.route('/send_statement_email/<account_id>', methods=['POST'])
     def handle_send_statement_email(account_id):
+        if not validate_email_settings():
+            return jsonify({'error': 'Email service not properly configured'}), 500
+            
         token = request.cookies.get(app.config['TOKEN_NAME'])
         if not verify_token(token):
             return abort(401)
@@ -725,6 +728,17 @@ def create_app():
             if pdf_response.status_code != 200:
                 return jsonify({'error': 'Failed to generate statement'}), 500
 
+            # Add connection test before sending
+            try:
+                test_server = smtplib.SMTP(
+                    os.environ.get('MAIL_SERVER'),
+                    int(os.environ.get('MAIL_PORT', '587'))
+                )
+                test_server.quit()
+            except Exception as e:
+                app.logger.error(f"SMTP server connection test failed: {str(e)}")
+                return jsonify({'error': 'Email service unavailable'}), 503
+
             # Send email using our custom function
             email_sent = send_statement_email(
                 recipient_email=user_email,
@@ -744,30 +758,22 @@ def create_app():
             return jsonify({'error': 'Failed to send statement'}), 500
 
     def send_statement_email(recipient_email, firstname, start_date, end_date, pdf_content):
-        """
-        Send a statement email to user
-        
-        Args:
-            recipient_email: User's email address
-            firstname: User's first name
-            start_date: Statement start date
-            end_date: Statement end date
-            pdf_content: The PDF file content
-        """
+        """Send a statement email to user"""
+        server = None
         try:
-            # Get email configuration from environment variables
+            # Get email configuration
             mail_server = os.environ.get('MAIL_SERVER')
             mail_port = int(os.environ.get('MAIL_PORT', '587'))
             mail_sender = os.environ.get('MAIL_DEFAULT_SENDER')
             mail_password = os.environ.get('EMAIL_PASSWORD')
             use_tls = os.environ.get('MAIL_USE_TLS', 'false').lower() == 'true'
-            
+
             # Create message
             msg = MIMEMultipart()
-            msg['From'] = mail_sender
+            msg['From'] = f"Group 3 Banking Team <{mail_sender}>"
             msg['To'] = recipient_email
             msg['Subject'] = f"Your Bank Statement - {start_date} to {end_date}"
-            
+
             # Create styled email body with CSS
             body = f"""
             <html>
@@ -837,19 +843,63 @@ def create_app():
                                     filename=f'bank_statement_{start_date}_to_{end_date}.pdf')
             msg.attach(pdf_attachment)
             
-            # Connect to SMTP server and send
+            # Proper SMTP connection handling
+            app.logger.debug(f"Connecting to SMTP server: {mail_server}:{mail_port}")
             server = smtplib.SMTP(mail_server, mail_port)
+            
             if use_tls:
+                app.logger.debug("Initiating TLS connection")
                 server.starttls()
+            
+            app.logger.debug("Logging into SMTP server")
             server.login(mail_sender, mail_password)
+            
+            app.logger.debug(f"Sending email to {recipient_email}")
             server.send_message(msg)
-            server.quit()
             
             app.logger.info(f"Statement email sent successfully to {recipient_email}")
             return True
+
+        except smtplib.SMTPConnectError as e:
+            app.logger.error(f"Failed to connect to SMTP server: {str(e)}")
+            return False
+        except smtplib.SMTPAuthenticationError as e:
+            app.logger.error(f"SMTP authentication failed: {str(e)}")
+            return False
+        except smtplib.SMTPException as e:
+            app.logger.error(f"SMTP error occurred: {str(e)}")
+            return False
         except Exception as e:
             app.logger.error(f"Failed to send statement email: {str(e)}")
             return False
+        finally:
+            if server is not None:
+                try:
+                    server.quit()
+                except Exception as e:
+                    app.logger.warning(f"Error closing SMTP connection: {str(e)}")
+
+    def validate_email_settings():
+        """Validate required email settings are configured"""
+        required_settings = {
+            'MAIL_SERVER': os.environ.get('MAIL_SERVER'),
+            'MAIL_PORT': os.environ.get('MAIL_PORT'),
+            'MAIL_DEFAULT_SENDER': os.environ.get('MAIL_DEFAULT_SENDER'),
+            'EMAIL_PASSWORD': os.environ.get('EMAIL_PASSWORD')
+        }
+        
+        missing = [k for k, v in required_settings.items() if not v]
+        if missing:
+            app.logger.error(f"Missing required email settings: {', '.join(missing)}")
+            return False
+            
+        try:
+            int(required_settings['MAIL_PORT'])
+        except ValueError:
+            app.logger.error(f"Invalid MAIL_PORT: {required_settings['MAIL_PORT']}")
+            return False
+            
+        return True
 
     def decode_token(token):
         return jwt.decode(algorithms='RS256',
