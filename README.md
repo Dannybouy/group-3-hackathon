@@ -185,10 +185,10 @@ The [setup scripts](/src/accounts/contacts) provided will provision a Cloud SQL 
 2. **Set environment variables** corresponding to your project, desired GCP region/zone, and the Kubernetes namespace into which you want to deploy Bank of Anthos.
 
 ```
-export PROJECT_ID="my-project"
+export PROJECT_ID="dreamdev-team3"
 export DB_REGION="us-east1"
 export ZONE="us-east1-b"
-export CLUSTER="my-cluster-name"
+export CLUSTER="dreamdev-team3-cluster"
 export NAMESPACE="default"
 ```
 
