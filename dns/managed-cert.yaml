@@ -1,0 +1,7 @@
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: frontend-managed-cert
+spec:
+  domains:
+    - dreamdev3.live # Replace with your actual domain name

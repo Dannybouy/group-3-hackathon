@@ -1,49 +1,42 @@
-# Bank of Anthos
+# DreamDev3Project
 
-![GitHub branch check runs](https://img.shields.io/github/check-runs/GoogleCloudPlatform/bank-of-anthos/main)
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcymbal-bank.fsi.cymbal.dev%2F&label=live%20demo
-)](https://cymbal-bank.fsi.cymbal.dev)
+<!-- ![GitHub branch check runs](https://img.shields.io/github/check-runs/GoogleCloudPlatform/bank-of-anthos/main)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcymbal-bank.fsi.cymbal.dev%2F&label=live%20demo)](https://cymbal-bank.fsi.cymbal.dev) -->
 
-**Bank of Anthos** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
+![GitHub branch check runs](https://img.shields.io/github/check-runs/tkdreamdev/group-3-hackathon/main)
 
-Google uses this application to demonstrate how developers can modernize enterprise applications using Google Cloud products, including: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine), [Anthos Service Mesh (ASM)](https://cloud.google.com/anthos/service-mesh), [Anthos Config Management (ACM)](https://cloud.google.com/anthos/config-management), [Migrate to Containers](https://cloud.google.com/migrate/containers), [Spring Cloud GCP](https://spring.io/projects/spring-cloud-gcp), [Cloud Operations](https://cloud.google.com/products/operations), [Cloud SQL](https://cloud.google.com/sql/docs), [Cloud Build](https://cloud.google.com/build), and [Cloud Deploy](https://cloud.google.com/deploy). This application works on any Kubernetes cluster.
+<!-- [![Website](https://img.shields.io/website?url=https%3A%2F%2Fcymbal-bank.fsi.cymbal.dev%2F&label=live%20demo)](https://cymbal-bank.fsi.cymbal.dev) -->
 
-If you are using Bank of Anthos, please ★Star this repository to show your interest!
+**<DreamDev3Project>** DreamDevs Group3 is an HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
 
-**Note to Googlers:** Please fill out the form at [go/bank-of-anthos-form](https://goto2.corp.google.com/bank-of-anthos-form).
+Our application utilizes the following Google Cloud products: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs), [Cloud SQL](https://cloud.google.com/sql/docs), [Cloud Build](https://cloud.google.com/build/docs), [Cloud Monitoring](https://cloud.google.com/monitoring/docs), [Cloud Logging](https://cloud.google.com/logging/docs).
 
 ## Screenshots
 
-| Sign in                                                                                                        | Home                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Login](/docs/img/login.png)](/docs/img/login.png) | [![User Transactions](/docs/img/transactions.png)](/docs/img/transactions.png) |
-
+| Sign in                                                                                                                                   | Home                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [![Login](/pre-rollout/images_pre_rollout/demo_of_my_group_app_login.png)](pre-rollout/images_pre_rollout/demo_of_my_group_app_login.png) | [![User Transactions](/pre-rollout/images_pre_rollout/demo_my_group_app_transactions.png)](/pre-rollout/images_pre_rollout/demo_my_group_app_transactions.png) |
 
 ## Service architecture
 
-![Architecture Diagram](/docs/img/architecture.png)
+![Architecture Diagram](/cloudsql/arch.png)
 
-| Service                                                 | Language      | Description                                                                                                                                  |
-| ------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](/src/frontend)                              | Python        | Exposes an HTTP server to serve the website. Contains login page, signup page, and home page.                                                |
-| [ledger-writer](/src/ledger/ledgerwriter)              | Java          | Accepts and validates incoming transactions before writing them to the ledger.                                                               |
-| [balance-reader](/src/ledger/balancereader)            | Java          | Provides efficient readable cache of user balances, as read from `ledger-db`.                                                                |
-| [transaction-history](/src/ledger/transactionhistory)  | Java          | Provides efficient readable cache of past transactions, as read from `ledger-db`.                                                            |
-| [ledger-db](/src/ledger/ledger-db)                     | PostgreSQL    | Ledger of all transactions. Option to pre-populate with transactions for demo users.                                                         |
-| [user-service](/src/accounts/userservice)              | Python        | Manages user accounts and authentication. Signs JWTs used for authentication by other services.                                              |
-| [contacts](/src/accounts/contacts)                     | Python        | Stores list of other accounts associated with a user. Used for drop down in "Send Payment" and "Deposit" forms.                              |
-| [accounts-db](/src/accounts/accounts-db)               | PostgreSQL    | Database for user accounts and associated data. Option to pre-populate with demo users.                                                      |
-| [loadgenerator](/src/loadgenerator)                    | Python/Locust | Continuously sends requests imitating users to the frontend. Periodically creates new accounts and simulates transactions between them.      |
+| Service                                               | Language      | Description                                                                                                                             |
+| ----------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [frontend](/src/frontend)                             | Python        | Exposes an HTTP server to serve the website. Contains login page, signup page, and home page.                                           |
+| [ledger-writer](/src/ledger/ledgerwriter)             | Java          | Accepts and validates incoming transactions before writing them to the ledger.                                                          |
+| [balance-reader](/src/ledger/balancereader)           | Java          | Provides efficient readable cache of user balances, as read from `ledger-db`.                                                           |
+| [transaction-history](/src/ledger/transactionhistory) | Java          | Provides efficient readable cache of past transactions, as read from `ledger-db`.                                                       |
+| [ledger-db](/src/ledger/ledger-db)                    | PostgreSQL    | Ledger of all transactions. Option to pre-populate with transactions for demo users.                                                    |
+| [user-service](/src/accounts/userservice)             | Python        | Manages user accounts and authentication. Signs JWTs used for authentication by other services.                                         |
+| [contacts](/src/accounts/contacts)                    | Python        | Stores list of other accounts associated with a user. Used for drop down in "Send Payment" and "Deposit" forms.                         |
+| [accounts-db](/src/accounts/accounts-db)              | PostgreSQL    | Database for user accounts and associated data. Option to pre-populate with demo users.                                                 |
+| [loadgenerator](/src/loadgenerator)                   | Python/Locust | Continuously sends requests imitating users to the frontend. Periodically creates new accounts and simulates transactions between them. |
 
-## Interactive quickstart (GKE)
-
-The following button opens up an interactive tutorial showing how to deploy Bank of Anthos in GKE:
-
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?show=ide&cloudshell_git_repo=https://github.com/GoogleCloudPlatform/bank-of-anthos&cloudshell_workspace=.&cloudshell_tutorial=extras/cloudshell/tutorial.md)
-
-## Quickstart (GKE)
+## Deployment (GKE)
 
 1. Ensure you have the following requirements:
+
    - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
    - Shell environment with `gcloud`, `git`, and `kubectl`.
 
@@ -119,31 +112,150 @@ The following button opens up an interactive tutorial showing how to deploy Bank
 
    Deleting the cluster may take a few minutes.
 
-## Additional deployment options
+## Cloud Build
 
-- **Workload Identity**: [See these instructions.](/docs/workload-identity.md)
-- **Cloud SQL**: [See these instructions](/extras/cloudsql) to replace the in-cluster databases with hosted Google Cloud SQL.
-- **Multi Cluster with Cloud SQL**: [See these instructions](/extras/cloudsql-multicluster) to replicate the app across two regions using GKE, Multi Cluster Ingress, and Google Cloud SQL.
-- **Istio**: [See these instructions](/extras/istio) to configure an IngressGateway.
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](/docs/workload-identity.md) to configure and deploy the app. Then, apply `extras/istio/` to your cluster to configure frontend ingress.
-- **Java Monolith (VM)**: We provide a version of this app where the three Java microservices are coupled together into one monolithic service, which you can deploy inside a VM (eg. Google Compute Engine). See the [ledgermonolith](/src/ledgermonolith) directory.
+We leverage Cloud Build triggers to fully automate our CI/CD pipeline for each microservice. Below is what happens on every push to `main` when the corresponding `cloudbuild.yaml` is modified:
+
+1. Preconditions
+
+   - Cloud Build API and Artifact Registry API must be enabled in your project.
+   - Service account for Cloud Build needs “Artifact Registry Writer” and “Kubernetes Developer” roles on the cluster.
+   - Ensure `$PROJECT_ID`, `$REGION`, and necessary IAM bindings are configured.
+
+2. Trigger behavior
+
+   - Filters on changes to the service’s own `cloudbuild.yaml` path.
+   - Builds the Docker image (or Jib/Maven build for Java services).
+   - Pushes the image to Artifact Registry under `<region>-docker.pkg.dev/$PROJECT_ID/<repo>/<service>`.
+   - Authenticates to the GKE cluster and updates the Deployment or StatefulSet image in the `default` namespace.
+
+3. Naming & conventions
+
+   - Trigger names follow the pattern `<service>-trigger`.
+   - Path filters use regex anchored to the `src/<service>/cloudbuild.yaml` location.
+   - Artifacts are tagged with the short commit SHA (`$SHORT_SHA`).
+
+4. Viewing & troubleshooting
+   - List all triggers:
+     ```sh
+     gcloud beta builds triggers list --project=$PROJECT_ID
+     ```
+   - Inspect logs for a build:
+     ```sh
+     gcloud beta builds log <BUILD_ID> --project=$PROJECT_ID
+     ```
+   - Manually invoke a trigger:
+     ```sh
+     gcloud beta builds triggers run <TRIGGER_ID> --branch=main
+     ```
+
+| Service            | Trigger name                 | Path filter                         | Build config                                    |
+| ------------------ | ---------------------------- | ----------------------------------- | ----------------------------------------------- |
+| loadgenerator      | `loadgenerator-trigger`      | `^src/loadgenerator/**`             | `src/loadgenerator/cloudbuild.yaml`             |
+| frontend           | `frontend-trigger`           | `^src/frontend/**`                  | `src/frontend/cloudbuild.yaml`                  |
+| userservice        | `userservice-trigger`        | `^src/accounts/userservice/**`      | `src/accounts/userservice/cloudbuild.yaml`      |
+| contacts           | `contacts-trigger`           | `^src/accounts/contacts/**`         | `src/accounts/contacts/cloudbuild.yaml`         |
+| accounts-db        | `accounts-db-trigger`        | `^src/accounts/accounts-db/**`      | `src/accounts/accounts-db/cloudbuild.yaml`      |
+| ledgerwriter       | `ledgerwriter-trigger`       | `^src/ledger/ledgerwriter/**`       | `src/ledger/ledgerwriter/cloudbuild.yaml`       |
+| balancereader      | `balancereader-trigger`      | `^src/ledger/balancereader/**`      | `src/ledger/balancereader/cloudbuild.yaml`      |
+| transactionhistory | `transactionhistory-trigger` | `^src/ledger/transactionhistory/**` | `src/ledger/transactionhistory/cloudbuild.yaml` |
+| ledger-db          | `ledger-db-trigger`          | `^src/ledger/ledger-db/**`          | `src/ledger/ledger-db/cloudbuild.yaml`          |
+
+## Cloud SQL
+
+This subsection contains instructions and Kubernetes manifests for overriding the default in-cluster PostgreSQL databases (`accountsdb` + `ledgerdb`) with Google Cloud SQL.
+
+## How it works
+
+The [setup scripts](/src/accounts/contacts) provided will provision a Cloud SQL instance in your Google Cloud Project. The script will then create two databases - one for the **accounts DB**, one for the **ledger DB**. This replaces the two separate PostgreSQL StatefulSets used in Bank of Anthos by default.
+
+## Setup
+
+1. **Create a [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)** if you don't already have one.
+
+2. **Set environment variables** corresponding to your project, desired GCP region/zone, and the Kubernetes namespace into which you want to deploy Bank of Anthos.
+
+```
+export PROJECT_ID="my-project"
+export DB_REGION="us-east1"
+export ZONE="us-east1-b"
+export CLUSTER="my-cluster-name"
+export NAMESPACE="default"
+```
+
+3. **Enable the [GKE API](https://cloud.google.com/kubernetes-engine/docs/reference/rest)**. This may take a few minutes.
+
+```
+gcloud services enable container.googleapis.com
+```
+
+4. **Create a GKE cluster** with [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#overview) enabled. Workload Identity lets you use a Kubernetes service account like a Google Cloud service account, giving your pods granular Google Cloud API permissions - in this case, permission for the Bank of Anthos Pods to access Cloud SQL.
+
+```
+gcloud container clusters create $CLUSTER \
+   --project=$PROJECT_ID --zone=$ZONE \
+   --machine-type=e2-standard-4 --num-nodes=4 \
+   --workload-pool="$PROJECT_ID.svc.id.goog"
+```
+
+5. **Run the Workload Identity setup script** for your new cluster. This script creates a Google Service Account (GSA) and Kubernetes Service Account (KSA), associates them together, then grants the service account permission to access Cloud SQL.
+
+```
+./setup_workload_identity.sh
+```
+
+6. **Run the Cloud SQL instance create script**. This takes a few minutes to complete.
+
+```
+./create_cloudsql_instance.sh
+```
+
+7. **Create a Cloud SQL admin demo secret** in your GKE cluster. This gives your in-cluster Cloud SQL client a username and password to access Cloud SQL. (Note that admin/admin credentials are for demo use only and should never be used in a production environment.)
+
+```
+export INSTANCE_NAME='bank-of-anthos-db'
+export INSTANCE_CONNECTION_NAME=$(gcloud sql instances describe $INSTANCE_NAME --format='value(connectionName)')
+
+kubectl create secret -n $NAMESPACE generic cloud-sql-admin \
+ --from-literal=username=admin --from-literal=password=admin \
+ --from-literal=connectionName=$INSTANCE_CONNECTION_NAME
+```
+
+8. **Deploy Bank of Anthos** to your cluster. Each backend Deployment (`userservice`, `contacts`, `transactionhistory`, `balancereader`, and `ledgerwriter`) is configured with a [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy#what_the_proxy_provides) sidecar container. Cloud SQL Proxy provides a secure TLS connection between the backend GKE pods and your Cloud SQL instance.
+
+This command will also deploy two Kubernetes Jobs, to populate the accounts and ledger dbs with Tables and test data.
+
+```
+kubectl apply -n $NAMESPACE -f ./kubernetes-manifests/config.yaml
+kubectl apply -n $NAMESPACE -f ./populate-jobs
+kubectl apply -n $NAMESPACE -f ./kubernetes-manifests
+```
+
+9. Wait a few minutes for all the pods to be `RUNNING`. (Except for the two `populate-` Jobs. They should be marked `0/3 - Completed` when they finish successfully.)
+
+```
+NAME                                  READY   STATUS      RESTARTS   AGE
+balancereader-d48c8d84c-j7ph7         2/2     Running     0          2m56s
+contacts-bbfdbb97f-vzxmv              2/2     Running     0          2m55s
+frontend-65c78dd78c-tsq26             1/1     Running     0          2m55s
+ledgerwriter-774b7bf7b9-jpz7l         2/2     Running     0          2m54s
+loadgenerator-f489d8858-q2n46         1/1     Running     0          2m54s
+populate-accounts-db-wrh4m            0/3     Completed   0          2m54s
+populate-ledger-db-422cr              0/3     Completed   0          2m53s
+transactionhistory-747476548c-j2zqx   2/2     Running     0          2m53s
+userservice-7f6df69544-nskdf          2/2     Running     0          2m53s
+```
+
+10. Access the Bank of Anthos frontend at the frontend service `EXTERNAL_IP`, then log in as `test-user` with the pre-populated credentials added to the Cloud SQL-based `accounts-db`. You should see the pre-populated transaction data show up, from the Cloud SQL-based `ledger-db`. You're done!
 
 ## Documentation
 
-<!-- This section is duplicated in the docs/ README: https://github.com/GoogleCloudPlatform/bank-of-anthos/blob/main/docs/README.md -->
-
 - [Development](/docs/development.md) to learn how to run and develop this app locally.
-- [Environments](/docs/environments.md) to learn how to deploy on non-GKE clusters.
 - [Workload Identity](/docs/workload-identity.md) to learn how to set-up Workload Identity.
-- [CI/CD pipeline](/docs/ci-cd-pipeline.md) to learn details about and how to set-up the CI/CD pipeline.
 - [Troubleshooting](/docs/troubleshooting.md) to learn how to resolve common problems.
 
-## Demos featuring Bank of Anthos
-- [Tutorial: Explore Anthos (Google Cloud docs)](https://cloud.google.com/anthos/docs/tutorials/explore-anthos)
-- [Tutorial: Migrating a monolith VM to GKE](https://cloud.google.com/migrate/containers/docs/migrating-monolith-vm-overview-setup)
-- [Tutorial: Running distributed services on GKE private clusters using ASM](https://cloud.google.com/service-mesh/docs/distributed-services-private-clusters)
-- [Tutorial: Run full-stack workloads at scale on GKE](https://cloud.google.com/kubernetes-engine/docs/tutorials/full-stack-scale)
-- [Architecture: Anthos on bare metal](https://cloud.google.com/architecture/ara-anthos-on-bare-metal)
-- [Architecture: Creating and deploying secured applications](https://cloud.google.com/architecture/security-foundations/creating-deploying-secured-apps)
-- [Keynote @ Google Cloud Next '20: Building trust for speedy innovation](https://www.youtube.com/watch?v=7QR1z35h_yc)
-- [Workshop @ IstioCon '22: Manage and secure distributed services with ASM](https://www.youtube.com/watch?v=--mPdAxovfE)
+## Additional reading
+
+- GKE Deployments with Cloud Build: https://cloud.google.com/build/docs/deploying-builds/deploy-gke
+- Artifact Registry quickstart: https://cloud.google.com/artifact-registry/docs/docker/quickstart
+- Cloud Build triggers overview: https://cloud.google.com/build/docs/automating-builds/create-manage-triggers
