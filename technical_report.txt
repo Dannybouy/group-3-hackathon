@@ -1,0 +1,135 @@
+Technical Report: Bank of Anthos
+=================================
+
+1. Introduction
+---------------
+Bank of Anthos is an HTTP‑based web application simulating a bank’s payment processing network. It enables users to create test bank accounts, perform transactions, and view statements. This report details the system architecture, component responsibilities, deployment workflows, CI/CD pipeline, database integration, monitoring, security measures, and operational considerations.
+
+2. System Architecture
+----------------------
+- Hosted on Google Kubernetes Engine (GKE) with multiple microservices for front‑end and back‑end logic.
+- Uses Cloud SQL (managed PostgreSQL) for persistent storage of user accounts and transaction ledgers.
+- Ingress controller with a Google‑managed SSL certificate enforces HTTPS and routes traffic to thefrontend.
+- Cloud Build triggers automate container image builds and deployments per microservice.
+- Cloud Monitoring and Cloud Logging provide real‑time dashboards and logs.
+
+Architecture Diagram:
+  • See `/cloudsql/arch.png` in the repo for a visual overview.
+
+3. Microservice Components
+---------------------------
+| Service                 | Language      | Responsibilities                                                                                   |
+|-------------------------|---------------|----------------------------------------------------------------------------------------------------|
+| frontend                | Python        | Serves static assets and REST endpoints; handles sign‑in, signup, and transaction submission UI.   |
+| userservice             | Python        | Manages user profiles, authentication, JWT signing, and email notifications.                       |
+| contacts                | Python        | Stores and retrieves user contact lists for transfers and deposits.                                |
+| ledgerwriter            | Java          | Validates transactions and writes to the ledger database.                                          |
+| balancereader           | Java          | Caches and serves live user balances from the ledger.                                             |
+| transactionhistory      | Java          | Retrieves paginated transaction history for users.                                                |
+| accounts-db             | PostgreSQL    | Stores user account data, including new email field and authentication records.                   |
+| ledger-db               | PostgreSQL    | Maintains the complete ledger of transactions for audit and reporting.                             |
+| loadgenerator           | Python/Locust | Simulates user behavior in load tests, account creation, and transactions.                         |
+
+4. Database Schema & Migration
+------------------------------
+- Added `email` column to `users` table for secure email storage.
+- Migrated on‑cluster Postgres to Cloud SQL for high availability, automated backups, and managed scaling.
+- Two separate Cloud SQL databases: one for `accounts` and one for `ledger`.
+- Sidecar Cloud SQL Proxy in each backend pod ensures secure TLS connections to Cloud SQL instances.
+
+5. CI/CD Pipeline
+-----------------
+- Each microservice has its own `cloudbuild.yaml` under `src/<service>/cloudbuild.yaml`.
+- Cloud Build triggers named `<service>-trigger` watch only their respective paths.
+- Builds include:
+   • Docker/Maven/Jib builds
+   • Container image pushes to Artifact Registry (`<region>-docker.pkg.dev/$PROJECT_ID/<repo>/<service>`)
+   • `kubectl` rollout to update Deployments or StatefulSets
+- Sample trigger configuration:
+
+    ```
+    name: userservice-trigger
+    triggerTemplate:
+      branchName: main
+      repoName: group-3-hackathon
+      path: src/accounts/userservice/cloudbuild.yaml
+    ```
+
+6. Monitoring & Logging
+-----------------------
+- Custom Cloud Monitoring dashboard aggregates:
+   • Service health metrics (CPU, memory, pod restarts)
+   • Transaction throughput and latency per service
+   • Request error rates
+- Cloud Logging collects application logs, structured with severity labels for quick filtering.
+- Alerts configured for pod crashes, high CPU usage, and error rate spikes.
+
+7. Security
+-----------
+- HTTPS enforced via GKE Ingress with a Google‑managed SSL certificate (`ManagedCertificate`).
+- Reserved a static global IP and configured DNS `A` record for the custom domain.
+- JWT‑based authentication. `userservice` signs tokens; other services validate JWTs on each request.
+- Workload Identity associates Kubernetes Service Accounts with Google Service Accounts to grant minimal Cloud SQL access permissions.
+- TLS certificates managed automatically; no manual certificate rotation.
+
+8. Deployment Workflow
+----------------------
+1. Reserve static IP:  
+   `gcloud compute addresses create frontend-static-ip --global --project=$PROJECT_ID`  
+2. DNS `A` record points domain to reserved IP.  
+3. Apply Kubernetes manifests:  
+   `kubectl apply -f kubernetes-manifests/`  
+4. Deploy `ManagedCertificate` and `Ingress`:  
+   `kubectl apply -f managed-certificate.yaml`  
+   `kubectl apply -f frontend-ingress.yaml`  
+5. Create Cloud SQL admin secret:  
+   `kubectl create secret generic cloud-sql-admin …`  
+6. Deploy populate‑jobs and await completion, then confirm all backend pods are Running.
+
+9. Feature Highlights
+---------------------
+- Dark mode UI toggle for low‑light environments.
+- Welcome email automation on account creation.
+- PDF generation of account statements for any date range, with email delivery.
+- Integrated credit‑score evaluation enabling loan eligibility checks.
+
+10. Operational Considerations
+------------------------------
+- Scale GKE node pools based on loadgenerator metrics.
+- Backup Cloud SQL daily; test restore procedures quarterly.
+- Review Cloud Monitoring alerts monthly and adjust thresholds.
+- Periodically rotate secrets; migrate to Secret Manager for production.
+
+11. Future Enhancements
+-----------------------
+- Multi‑region GKE deployment for disaster recovery.
+  • Deploy duplicate clusters in a secondary region (e.g., us-east1)  
+  • Use Global HTTP(S) Load Balancer with health checks for active-active failover  
+  • Automate cross‑region database replication via Cloud SQL read replicas  
+
+- Push real‑time transaction notifications via WebSockets.
+  • Introduce a Notification Service that subscribes to transaction events  
+  • Use Cloud Pub/Sub as the event bus and a lightweight Node.js/WebSocket server  
+  • Update frontend to open a persistent WebSocket channel for live updates  
+
+- Integrate KMS‑backed encryption for at‑rest data.
+  • Leverage Cloud KMS to manage envelope encryption keys  
+  • Enable CMEK on Cloud SQL instances and Artifact Registry  
+  • Rotate keys on a schedule and audit via Cloud Audit Logs  
+
+- Implement role‑based access control (RBAC) for finer permission granularity.
+  • Define Kubernetes RBAC roles for operators vs. viewers vs. developers  
+  • Enforce least privilege on service accounts accessing Cloud SQL and Pub/Sub  
+  • Integrate with Cloud IAM to manage GCP resource permissions centrally  
+
+12. Conclusion
+--------------
+Bank of Anthos provides a robust, cloud‑native banking simulation platform with:
+  - Modular microservices deployed on GKE  
+  - Secure data storage via Cloud SQL and TLS encryption  
+  - Automated CI/CD with isolated build configs per service  
+  - Observability through custom Cloud Monitoring dashboards  
+
+The roadmap above targets increased resilience, real‑time user experience, and enhanced security. Moving forward, we’ll prioritize multi‑region reliability, end‑to‑end encryption, and granular access controls to support production‑grade deployments.
+
+End of Report.

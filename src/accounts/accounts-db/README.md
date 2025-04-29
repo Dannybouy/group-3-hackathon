@@ -13,10 +13,12 @@ variables listed below. You may login to the account using the password
 ### Environment Variables
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
 
 - ConfigMap `demo-data-config`:
+
   - `USE_DEMO_DATA`
     - adds demo user accounts to the database when initialized if `True`
     - data is initialized with /src/accounts-db/initdb/1_load_testdata.sh

@@ -1,0 +1,9 @@
+Enabled a comprehensive dark mode theme throughout the application to improve user experience in low‑light environments.
+Added a new email field to the database schema to store users’ email addresses securely and reliably.
+Implemented a welcome email feature that automatically sends a personalized greeting upon account creation.
+Developed functionality to generate account statements for a specified date range, export them as PDF documents, and automatically email them to users.
+Integrated a credit score evaluation system that allows users to apply for loans based on their proven creditworthiness.
+Created individual Cloud Build configuration files for each microservice to ensure scalable and efficient continuous integration and deployment.
+Developed a custom cloud monitoring dashboard that provides real-time insights into service performance and health metrics.
+Migrated the database from PostgreSQL to Cloud SQL to enhance reliability, scalability, and managed database services.
+Configured HTTPS across the application to enforce secure communication via TLS encryption and protect user data.

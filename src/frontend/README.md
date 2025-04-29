@@ -6,19 +6,24 @@ Implemented in Python with Flask.
 
 ### Endpoints
 
-| Endpoint   | Type  | Auth? | Description                                                                               |
-| ---------- | ----- | ----- | ----------------------------------------------------------------------------------------- |
-| `/`        | GET   | 🔒    |  Renders `/home` or `/login` based on authentication status. Must always return 200       |
-| `/deposit` | POST  | 🔒    |  Submits a new external deposit transaction to `ledgerwriter`                             |
-| `/home`    | GET   | 🔒    |  Renders homepage if authenticated Otherwise redirects to `/login`                        |
-| `/login`   | GET   |       |  Renders login page if not authenticated. Otherwise redirects to `/home`                  |
-| `/login`   | POST  |       |  Submits login request to `userservice`                                                   |
-| `/logout`  | POST  | 🔒    | delete local authentication token and redirect to `/login`                                |
-| `/payment` | POST  | 🔒    |  Submits a new internal payment transaction to `ledgerwriter`                             |
-| `/ready`   | GET   |       |  Readiness probe endpoint.                                                                |
-| `/signup`  | GET   |       |  Renders signup page if not authenticated. Otherwise redirects to `/home`                 |
-| `/signup`  | POST  |       |  Submits new user signup request to `userservice`                                         |
-| `/version` | GET   |       |  Returns the contents of `$VERSION`                                                       |
+| Endpoint                             | Type | Auth? | Description                                                                        |
+| ------------------------------------ | ---- | ----- | ---------------------------------------------------------------------------------- |
+| `/`                                  | GET  | 🔒    | Renders `/home` or `/login` based on authentication status; must always return 200 |
+| `/ready`                             | GET  |       | Readiness probe endpoint.                                                          |
+| `/version`                           | GET  |       | Returns the contents of `$VERSION`.                                                |
+| `/whereami`                          | GET  |       | Returns the cluster name, pod name and zone where this Pod is running.             |
+| `/home`                              | GET  | 🔒    | Renders homepage if authenticated; otherwise redirects to `/login`.                |
+| `/login`                             | GET  |       | Renders login page if not authenticated; otherwise redirects to `/home`.           |
+| `/login`                             | POST |       | Submits login request to `userservice`.                                            |
+| `/logout`                            | POST | 🔒    | Deletes auth cookies and redirects to `/login`.                                    |
+| `/signup`                            | GET  |       | Renders signup page if not authenticated; otherwise redirects to `/home`.          |
+| `/signup`                            | POST |       | Submits new user signup request to `userservice`.                                  |
+| `/payment`                           | POST | 🔒    | Submits a new internal payment transaction to `ledgerwriter`.                      |
+| `/deposit`                           | POST | 🔒    | Submits a new external deposit transaction to `ledgerwriter`.                      |
+| `/statement/<account_id>/pdf`        | GET  | 🔒    | Downloads PDF statement for given account between provided date range.             |
+| `/send_statement_email/<account_id>` | POST | 🔒    | Generates PDF statement and emails it to the user.                                 |
+| `/consent`                           | GET  | 🔒    | Renders consent page or handles OAuth consent flow.                                |
+| `/consent`                           | POST | 🔒    | Processes consent decision and redirects back with auth code or error.             |
 
 ### Environment Variables
 
@@ -37,9 +42,11 @@ Implemented in Python with Flask.
 - `CYMBAL_LOGO`
   - boolean, set to `true` to toggle the CymbalBank logo and name. Defaults to `false`.
 - `ENV_PLATFORM`
+
   - a string to customize the platform banner depending on where application is running. Available options [alibaba, aws, azure, gcp, local, onprem]
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`

@@ -11,10 +11,12 @@ Implemented using Postgres.
 ### Environment Variables
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
 
 - ConfigMap `demo-data-config`:
+
   - `USE_DEMO_DATA`
     - adds demo transaction data to the ledger when initialized if `True`
     - data is initialized with /src/ledger-db/initdb/1_create_transactions.sh
