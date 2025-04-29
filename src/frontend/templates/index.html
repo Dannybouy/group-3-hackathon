@@ -46,6 +46,14 @@ limitations under the License.
           </div>
         </div>
       </div>
+      <script>
+        // Auto-dismiss alert after 5 seconds
+        setTimeout(function() {
+          $('#alert-message-div').fadeOut('slow', function() {
+            $(this).remove();
+          });
+        }, 5000);
+      </script>
     {% endif %}
 
       <!-- Top row - overview, account # -->

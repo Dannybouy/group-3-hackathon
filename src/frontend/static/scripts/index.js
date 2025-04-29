@@ -559,10 +559,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
       // Add to top of page
       const mainContent = document.querySelector('main.container');
       mainContent.insertBefore(alertContainer, mainContent.firstChild);
+
+      // Auto-dismiss alert after 5 seconds
+      setTimeout(function() {
+        $('#quick-cash-alert').fadeOut('slow', function() {
+          $(this).remove();
+        });
+      }, 5000);
       
-      // Reset button
-      button.innerHTML = originalText;
-      button.disabled = false;
+      // Change button to "Approved" state and keep it disabled
+      button.innerHTML = '<span class="material-icons">check_circle</span> Approved';
+      button.classList.remove('btn-success');
+      button.classList.add('btn-secondary');
+      button.disabled = true;
       
       // Optionally, update the balance to simulate receiving funds
       const currentBalanceEl = document.getElementById('current-balance');
