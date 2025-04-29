@@ -201,6 +201,50 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // Also apply after any mode change
   document.getElementById("mode").addEventListener("click", function() {
     setTimeout(applyTransactionTableDarkMode, 100);
+    
+    // Fix input fields in open modals when mode changes
+    setTimeout(function() {
+      const openModal = $('.modal.show');
+      if (openModal.length > 0) {
+        if (localStorage.getItem('mode') === 'dark_mode') {
+          // Apply dark mode styling to input fields in the open modal
+          openModal.find('select, input, textarea, .form-control, .custom-select').css({
+            'background-color': '#333',
+            'color': '#fff',
+            'border-color': '#555'
+          });
+          
+          // Handle any active/focused input field
+          const focusedInput = openModal.find('input:focus, select:focus, textarea:focus');
+          if (focusedInput.length > 0) {
+            focusedInput.css({
+              'background-color': '#333',
+              'color': '#fff',
+              'border-color': '#A3FD8C',
+              'box-shadow': '0 0 0 0.2rem rgba(163, 253, 140, 0.25)'
+            });
+          }
+        } else {
+          // Revert to light mode styling
+          openModal.find('select, input, textarea, .form-control, .custom-select').css({
+            'background-color': '#fff',
+            'color': '#333',
+            'border-color': '#ced4da'
+          });
+          
+          // Handle any active/focused input field
+          const focusedInput = openModal.find('input:focus, select:focus, textarea:focus');
+          if (focusedInput.length > 0) {
+            focusedInput.css({
+              'background-color': '#fff',
+              'color': '#333',
+              'border-color': '#80bdff',
+              'box-shadow': '0 0 0 0.2rem rgba(0, 123, 255, 0.25)'
+            });
+          }
+        }
+      }
+    }, 200);
   });
 
   function uuidv4() {
@@ -330,11 +374,37 @@ document.addEventListener("DOMContentLoaded", function(event) {
       modal.find('.modal-title').css('color', '#fff');
       modal.find('label').css('color', '#eee');
       modal.find('.text-muted, .text-uppercase').css('color', '#eee');
-      modal.find('select, input').css({
-        'background-color': '#444',
+      
+      // Ensure input fields have proper dark mode styling
+      modal.find('select, input, textarea, .form-control, .custom-select').css({
+        'background-color': '#333',
         'color': '#fff',
-        'border-color': '#666'
+        'border-color': '#555'
       });
+      
+      // Set up focus event handlers for all input fields in this modal
+      modal.find('input, select, textarea').each(function() {
+        // Remove any previous event handlers
+        $(this).off('focus.darkmode blur.darkmode');
+        
+        // Add focus and blur event handlers
+        $(this).on('focus.darkmode', function() {
+          $(this).css({
+            'background-color': '#333',
+            'color': '#fff',
+            'border-color': '#A3FD8C',
+            'box-shadow': '0 0 0 0.2rem rgba(163, 253, 140, 0.25)'
+          });
+        }).on('blur.darkmode', function() {
+          $(this).css({
+            'background-color': '#333',
+            'color': '#fff',
+            'border-color': '#555',
+            'box-shadow': 'none'
+          });
+        });
+      });
+      
       modal.find('.close span').css('color', '#fff');
       modal.find('.input-group-text').css({
         'background-color': '#444',
