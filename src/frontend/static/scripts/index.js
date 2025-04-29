@@ -107,7 +107,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelectorAll('.modal-content').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
         document.querySelectorAll('.modal label').forEach(el => el.style.setProperty("color", "#444", "important"));
         document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#444", "important"));
-        document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#333", "important"));
         
         // Transaction table text in light mode
         document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#333", "important"));
@@ -143,7 +142,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelectorAll('.modal-content').forEach(el => el.style.setProperty("background-color", "#333", "important")); 
         document.querySelectorAll('.modal label').forEach(el => el.style.setProperty("color", "#eee", "important"));
         document.querySelectorAll('.modal-content .text-muted').forEach(el => el.style.setProperty("color", "#eee", "important"));
-        document.querySelectorAll('.modal-content select, .modal-content input').forEach(el => el.style.setProperty("color", "#fff", "important"));
         
         // Transaction table text in dark mode
         document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#fff", "important"));
@@ -330,11 +328,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
       modal.find('.modal-title').css('color', '#fff');
       modal.find('label').css('color', '#eee');
       modal.find('.text-muted, .text-uppercase').css('color', '#eee');
-      modal.find('select, input').css({
-        'background-color': '#444',
-        'color': '#fff',
-        'border-color': '#666'
-      });
       modal.find('.close span').css('color', '#fff');
       modal.find('.input-group-text').css({
         'background-color': '#444',
