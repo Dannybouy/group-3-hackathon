@@ -1,8 +1,6 @@
 # Bank of Anthos
 
-![GitHub branch check runs](https://img.shields.io/github/check-runs/tkdreamdev/group-3-hackathon/main)
-
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fdreamdev3.live&label=live%20demo)](https://dreamdev3.live)
+![GitHub branch check runs](https://img.shields.io/github/check-runs/tkdreamdev/group-3-hackathon/main) [![Website](https://img.shields.io/website?url=https%3A%2F%2Fdreamdev3.live&label=live%20demo)](https://dreamdev3.live)
 
 **Bank of Anthos** is an HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
 
