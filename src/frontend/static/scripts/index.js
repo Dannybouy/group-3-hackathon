@@ -113,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelectorAll('.transaction-account, .transaction-label').forEach(el => el.style.setProperty("color", "#333", "important"));
         document.querySelectorAll('.transaction-date p').forEach(el => el.style.setProperty("color", "#333", "important"));
         document.querySelectorAll('.transaction-label-none').forEach(el => el.style.setProperty("color", "#333", "important"));
+        document.querySelectorAll('.card-table-header').forEach(el => el.style.setProperty("background-color", "#F8F8F8", "important"));
         document.querySelectorAll('.table-responsive').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
         document.querySelectorAll('.card-table').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
         document.querySelectorAll('.table-sm tbody tr').forEach(el => el.style.setProperty("background-color", "#fff", "important"));
@@ -559,13 +560,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
       // Add to top of page
       const mainContent = document.querySelector('main.container');
       mainContent.insertBefore(alertContainer, mainContent.firstChild);
-
-      // Auto-dismiss alert after 5 seconds
-      setTimeout(function() {
-        $('#quick-cash-alert').fadeOut('slow', function() {
-          $(this).remove();
-        });
-      }, 5000);
       
       // Change button to "Approved" state and keep it disabled
       button.innerHTML = '<span class="material-icons">check_circle</span> Approved';

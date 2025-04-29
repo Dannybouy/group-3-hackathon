@@ -46,15 +46,46 @@ limitations under the License.
           </div>
         </div>
       </div>
+    {% endif %}
       <script>
         // Auto-dismiss alert after 5 seconds
-        setTimeout(function() {
-          $('#alert-message-div').fadeOut('slow', function() {
-            $(this).remove();
+        $(document).ready(function() {
+          // Handle existing alerts on page load
+          if ($('#alert-message-div').length) {
+            setTimeout(function() {
+              $('#alert-message-div').fadeOut('slow', function() {
+                $(this).remove();
+              });
+            }, 5000);
+          }
+          
+          // Create a MutationObserver to watch for new alerts being added
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              mutation.addedNodes.forEach(function(node) {
+                // Check if the added node is an alert
+                if (node.nodeType === 1 && (
+                    node.id === 'alert-message-div' || 
+                    node.id === 'quick-cash-alert' ||
+                    (node.classList && node.classList.contains('alert-message-container'))
+                  )) {
+                  setTimeout(function() {
+                    $('#' + node.id).fadeOut('slow', function() {
+                      $(this).remove();
+                    });
+                  }, 5000);
+                }
+              });
+            });
           });
-        }, 5000);
+          
+          // Start observing the document with the configured parameters
+          observer.observe(document.querySelector('main.container'), { 
+            childList: true, 
+            subtree: true 
+          });
+        });
       </script>
-    {% endif %}
 
       <!-- Top row - overview, account # -->
       <div class="row col-lg-12 align-items-start top-row">
