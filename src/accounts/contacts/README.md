@@ -7,13 +7,12 @@ Implemented in Python with Flask.
 
 ### Endpoints
 
-| Endpoint                | Type  | Auth? | Description                                                        |
-| ----------------------- | ----- | ----- | ------------------------------------------------------------------ |
-| `/contacts/<username>`  | GET   | 🔒    |  Retrieve a list of saved accounts for the authenticated user.     |
-| `/contacts/<username>`  | POST  | 🔒    |  Add a new saved account for the authenticated user.               |
-| `/ready`                | GET   |       |  Readiness probe endpoint.                                         |
-| `/version`              | GET   |       |  Returns the contents of `$VERSION`                                |
-
+| Endpoint               | Type | Auth? | Description                                                   |
+| ---------------------- | ---- | ----- | ------------------------------------------------------------- |
+| `/contacts/<username>` | GET  | 🔒    | Retrieve a list of saved accounts for the authenticated user. |
+| `/contacts/<username>` | POST | 🔒    | Add a new saved account for the authenticated user.           |
+| `/ready`               | GET  |       | Readiness probe endpoint.                                     |
+| `/version`             | GET  |       | Returns the contents of `$VERSION`                            |
 
 ### Environment Variables
 
@@ -22,9 +21,11 @@ Implemented in Python with Flask.
 - `PORT`
   - the port for the webserver
 - `LOG_LEVEL`
+
   - the service-wide [logging level](https://docs.python.org/3/library/logging.html#levels) (default: INFO)
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`

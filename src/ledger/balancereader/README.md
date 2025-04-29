@@ -9,12 +9,12 @@ Implemented in Java with Spring Boot and Guava.
 
 ### Endpoints
 
-| Endpoint                | Type  | Auth? | Description                                                             |
-| ----------------------- | ----- | ----- | ----------------------------------------------------------------------- |
-| `/balances/<accountid>` | GET   | 🔒    |  Get the account balance iff owned by the currently authenticated user. |
-| `/healthy`              | GET   |       |  Liveness probe endpoint. Monitors health of background thread.         |
-| `/ready`                | GET   |       |  Readiness probe endpoint.                                              |
-| `/version`              | GET   |       |  Returns the contents of `$VERSION`                                     |
+| Endpoint                | Type | Auth? | Description                                                            |
+| ----------------------- | ---- | ----- | ---------------------------------------------------------------------- |
+| `/balances/<accountid>` | GET  | 🔒    | Get the account balance iff owned by the currently authenticated user. |
+| `/healthy`              | GET  |       | Liveness probe endpoint. Monitors health of background thread.         |
+| `/ready`                | GET  |       | Readiness probe endpoint.                                              |
+| `/version`              | GET  |       | Returns the contents of `$VERSION`                                     |
 
 ### Environment Variables
 
@@ -31,9 +31,11 @@ Implemented in Java with Spring Boot and Guava.
 - `JVM_OPTS`
   - settings for the JVM. Used to obey container memory limits
 - `LOG_LEVEL`
+
   - service level [log level](https://logging.apache.org/log4j/2.x/manual/customloglevels.html)
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`

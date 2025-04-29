@@ -3,18 +3,20 @@
 The transaction history service provides an efficient readable cache of past transactions, as read from the `ledger-db`.
 
 The `ledger-db` service holds the source of truth for the system.
-The `transaction-history`  reads and caches data from the `ledger-db`, but may be out of date when under heavy load.
+The `transaction-history` reads and caches data from the `ledger-db`, but may be out of date when under heavy load.
 
 Implemented in Java with Spring Boot and Guava.
 
 ### Endpoints
 
-| Endpoint                    | Type  | Auth? | Description                                                                   |
-| --------------------------- | ----- | ----- | ----------------------------------------------------------------------------- |
-| `/healthy`                  | GET   |       |  Liveness probe endpoint. Monitors health of background thread.               |
-| `/ready`                    | GET   |       |  Readiness probe endpoint.                                                    |
-| `/transactions/<accountid>` | GET   | 🔒    |  Return the account transaction list iff authenticated to access the account. |
-| `/version`                  | GET   |       |  Returns the contents of `$VERSION`                                           |
+| Endpoint                     | Type | Auth? | Description                                                                  |
+| ---------------------------- | ---- | ----- | ---------------------------------------------------------------------------- |
+| `/healthy`                   | GET  |       | Liveness probe endpoint. Monitors health of background thread.               |
+| `/ready`                     | GET  |       | Readiness probe endpoint.                                                    |
+| `/transactions/<accountid>`  | GET  | 🔒    | Return the account transaction list iff authenticated to access the account. |
+| `/statement/<accountid>`     | GET  | 🔒    | Generate a bank statement for the account within a specified date range.     |
+| `/statement/<accountid>/pdf` | GET  | 🔒    | Generate a PDF bank statement for the account within a specified date range. |
+| `/version`                   | GET  |       | Returns the contents of `$VERSION`                                           |
 
 ### Environment Variables
 
@@ -39,9 +41,11 @@ Implemented in Java with Spring Boot and Guava.
 - `EXTRA_LATENCY_MILLIS`
   - add fake extra latency in milliseconds to transaction history requests
 - `LOG_LEVEL`
+
   - service level [log level](https://logging.apache.org/log4j/2.x/manual/customloglevels.html)
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`

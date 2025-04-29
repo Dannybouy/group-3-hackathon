@@ -1,21 +1,30 @@
-# DreamDev3Project
-
-<!-- ![GitHub branch check runs](https://img.shields.io/github/check-runs/GoogleCloudPlatform/bank-of-anthos/main)
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fcymbal-bank.fsi.cymbal.dev%2F&label=live%20demo)](https://cymbal-bank.fsi.cymbal.dev) -->
+# Bank of Anthos
 
 ![GitHub branch check runs](https://img.shields.io/github/check-runs/tkdreamdev/group-3-hackathon/main)
 
-<!-- [![Website](https://img.shields.io/website?url=https%3A%2F%2Fcymbal-bank.fsi.cymbal.dev%2F&label=live%20demo)](https://cymbal-bank.fsi.cymbal.dev) -->
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fdreamdev3.live&label=live%20demo)](https://dreamdev3.live)
 
-**<DreamDev3Project>** DreamDevs Group3 is an HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
+**Bank of Anthos** is an HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
+
+## Added Changes
+
+- Added a new email field to the database schema to store users’ email addresses securely and reliably.
+- Implemented a welcome email feature that automatically sends a personalized greeting upon account creation.
+- Developed functionality to generate account statements for a specified date range, export them as PDF documents, and automatically email them to users.
+- Integrated a credit score evaluation system that allows users to apply for loans based on their proven creditworthiness.
+- Enabled a comprehensive dark mode theme throughout the application to improve user experience in low‑light environments.
+- Created individual Cloud Build configuration files for each microservice to ensure scalable and efficient continuous integration and deployment.
+- Developed a custom cloud monitoring dashboard that provides real-time insights into service performance and health metrics.
+- Migrated the database from PostgreSQL to Cloud SQL to enhance reliability, scalability, and managed database services.
+- Configured HTTPS across the application to enforce secure communication via TLS encryption and protect user data.
 
 Our application utilizes the following Google Cloud products: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine/docs), [Cloud SQL](https://cloud.google.com/sql/docs), [Cloud Build](https://cloud.google.com/build/docs), [Cloud Monitoring](https://cloud.google.com/monitoring/docs), [Cloud Logging](https://cloud.google.com/logging/docs).
 
 ## Screenshots
 
-| Sign in                                                                                                                                   | Home                                                                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [![Login](/pre-rollout/images_pre_rollout/demo_of_my_group_app_login.png)](pre-rollout/images_pre_rollout/demo_of_my_group_app_login.png) | [![User Transactions](/pre-rollout/images_pre_rollout/demo_my_group_app_transactions.png)](/pre-rollout/images_pre_rollout/demo_my_group_app_transactions.png) |
+| Sign in                                                                                                                                       | Home                                                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [![Login](/pre-rollout/images_pre_rollout/a_demo_of_my_group_app_login.png)](pre-rollout/images_pre_rollout/a_demo_of_my_group_app_login.png) | [![User Transactions](/pre-rollout/images_pre_rollout/a_demo_of_my_group_app_transactions.png)](/pre-rollout/images_pre_rollout/a_demo_of_my_group_app_transactions.png) |
 
 ## Service architecture
 
@@ -43,8 +52,8 @@ Our application utilizes the following Google Cloud products: [Google Kubernetes
 2. Clone the repository.
 
    ```sh
-   git clone https://github.com/GoogleCloudPlatform/bank-of-anthos
-   cd bank-of-anthos/
+   git clone https://github.com/Dannybouy/group-3-hackathon.git
+   cd group-3-hackathon/
    ```
 
 3. Set the Google Cloud project and region and ensure the Google Kubernetes Engine API is enabled.
@@ -248,7 +257,97 @@ userservice-7f6df69544-nskdf          2/2     Running     0          2m53s
 
 10. Access the Bank of Anthos frontend at the frontend service `EXTERNAL_IP`, then log in as `test-user` with the pre-populated credentials added to the Cloud SQL-based `accounts-db`. You should see the pre-populated transaction data show up, from the Cloud SQL-based `ledger-db`. You're done!
 
-## Documentation
+## HTTPS Configuration
+
+To secure the frontend service with HTTPS using a custom domain and a Google-managed SSL certificate, follow these steps:
+
+1.  **Reserve a Static External IP Address:**
+    Before configuring DNS and SSL, reserve a static IP address in the same region as your GKE cluster. This ensures the IP address assigned to your frontend load balancer doesn't change.
+
+    ```sh
+    gcloud compute addresses create frontend-static-ip --global --project=${PROJECT_ID}
+    # Note the reserved IP address
+    gcloud compute addresses describe frontend-static-ip --global --project=${PROJECT_ID} --format='value(address)'
+    ```
+
+2.  **Configure DNS:**
+    Go to your domain registrar or DNS provider and create an `A` record pointing your desired domain to the static IP address reserved in step 1. DNS propagation might take some time.
+
+3.  **Create a ManagedCertificate Resource:**
+    Create a Kubernetes manifest for a `ManagedCertificate`. This resource tells Google Cloud to provision and manage an SSL certificate for your domain.
+
+    ```yaml
+    # managed-certificate.yaml
+    apiVersion: networking.gke.io/v1
+    kind: ManagedCertificate
+    metadata:
+      name: frontend-managed-cert
+    spec:
+      domains:
+        - yourdomain # Replace with your domain
+    ```
+
+    Apply the manifest: `kubectl apply -f managed-certificate.yaml`
+    It can take several minutes for the certificate to be provisioned. Check its status:
+
+    ```sh
+    kubectl describe managedcertificate frontend-managed-cert
+    ```
+
+    Look for the `CertificateStatus` to become `Active`.
+
+4.  **Create/Update Ingress Resource:**
+    Create or update an Ingress resource to manage external access to the frontend service, associating it with the static IP and the managed certificate.
+
+    ```yaml
+    # frontend-ingress.yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: frontend-ingress
+      annotations:
+        kubernetes.io/ingress.global-static-ip-name: 'frontend-static-ip' # Name of the reserved static IP
+        networking.gke.io/managed-certificates: 'frontend-managed-cert'
+        kubernetes.io/ingress.class: 'gce'
+    spec:
+      rules:
+        - host: yourdomain # Replace with your domain
+          http:
+            paths:
+              - path: /*
+                pathType: Prefix # Explicitly set path type to Prefix
+                backend:
+                  service:
+                    name: frontend
+                    port:
+                      number: 80 # Traffic hits the LoadBalancer on port 80, then forwarded to targetPort 8080
+    ```
+
+    Apply the manifest: `kubectl apply -f frontend-ingress.yaml`
+    Check the Ingress status and associated events:
+
+    ```sh
+    kubectl describe ingress frontend-ingress
+    ```
+
+    Wait for the Google Cloud Load Balancer to be provisioned and associated with the static IP and certificate. This can take several minutes.
+
+5.  **Verify:**
+    Once the `ManagedCertificate` status is `Active` and the `Ingress` resource has successfully provisioned the load balancer (check events using `kubectl describe ingress frontend-ingress`), you should be able to access your application securely via `https://your-domain`. Traffic will be automatically redirected from HTTP to HTTPS.
+
+## Microservice Documentation
+
+- [Frontend Service](/src/frontend/README.md)
+- [User Service](/src/accounts/userservice/README.md)
+- [Contacts Service](/src/accounts/contacts/README.md)
+- [Accounts DB Service](/src/accounts/accounts-db/README.md)
+- [Ledger DB Service](/src/ledger/ledger-db/README.md)
+- [Ledger Writer Service](/src/ledger/ledgerwriter/README.md)
+- [Balance Reader Service](/src/ledger/balancereader/README.md)
+- [Transaction History Service](/src/ledger/transactionhistory/README.md)
+- [Load Generator Service](/src/loadgenerator/README.md)
+
+## Additional Documentation
 
 - [Development](/docs/development.md) to learn how to run and develop this app locally.
 - [Workload Identity](/docs/workload-identity.md) to learn how to set-up Workload Identity.

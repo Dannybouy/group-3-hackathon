@@ -6,11 +6,11 @@ Implemented in Java with Spring Boot.
 
 ### Endpoints
 
-| Endpoint           | Type  | Auth? | Description                                          |
-| ------------------ | ----- | ----- | ---------------------------------------------------- |
-| `/ready`           | GET   |       |  Readiness probe endpoint.                           |
-| `/transactions`    | POST  | 🔒    |  Submits a transaction to be appended to the ledger. |
-| `/version`         | GET   |       |  Returns the contents of `$VERSION`                  |
+| Endpoint        | Type | Auth? | Description                                         |
+| --------------- | ---- | ----- | --------------------------------------------------- |
+| `/ready`        | GET  |       | Readiness probe endpoint.                           |
+| `/transactions` | POST | 🔒    | Submits a transaction to be appended to the ledger. |
+| `/version`      | GET  |       | Returns the contents of `$VERSION`                  |
 
 ### Environment Variables
 
@@ -22,14 +22,15 @@ Implemented in Java with Spring Boot.
   - settings for the JVM. Used to obey container memory limits
 - `LOG_LEVEL`
   - the service-wide [log level](https://logging.apache.org/log4j/2.x/manual/customloglevels.html) (default: INFO)
-  
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`
     - the path to the JWT signer's public key, mounted as a secret
 
 - ConfigMap `service-api-config`
+
   - `BALANCES_API_ADDR`
     - the address and port of the `balancereader` service
 

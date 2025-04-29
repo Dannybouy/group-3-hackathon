@@ -1,18 +1,19 @@
 # User Service
 
-The user service manages user accounts and authentication. 
+The user service manages user accounts and authentication.
 It creates and signs JWTs that are used by other services to authenticate users.
 
 Implemented in Python with Flask.
 
 ### Endpoints
 
-| Endpoint            | Type  | Auth? | Description                                                      |
-| ------------------- | ----- | ----- | ---------------------------------------------------------------- |
-| `/login`            | GET   |       |  Returns a JWT if authentication is successful.                  |
-| `/ready`            | GET   |       |  Readiness probe endpoint.                                       |
-| `/users`            | POST  |       |  Validates and creates a new user record.                        |
-| `/version`          | GET   |       |  Returns the contents of `$VERSION`                              |
+| Endpoint            | Type | Auth? | Description                                    |
+| ------------------- | ---- | ----- | ---------------------------------------------- |
+| `/login`            | GET  |       | Returns a JWT if authentication is successful. |
+| `/ready`            | GET  |       | Readiness probe endpoint.                      |
+| `/users`            | POST |       | Validates and creates a new user record.       |
+| `/users/<username>` | GET  | 🔒    | Retrieves user details for the specified user. |
+| `/version`          | GET  |       | Returns the contents of `$VERSION`             |
 
 ### Environment Variables
 
@@ -25,9 +26,11 @@ Implemented in Python with Flask.
 - `TOKEN_EXPIRY_SECONDS`
   - how long JWTs are valid before forcing user logout
 - `LOG_LEVEL`
+
   - the service-specific [logging level](https://docs.python.org/3/library/logging.html#levels) (default: INFO)
 
 - ConfigMap `environment-config`:
+
   - `LOCAL_ROUTING_NUM`
     - the routing number for our bank
   - `PUB_KEY_PATH`
