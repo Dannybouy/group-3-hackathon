@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    kubernetes.io/ingress.class: 'gce'
+    # Link the Managed Certificate
+    networking.gke.io/managed-certificates: 'frontend-managed-cert'
+    # Use the static IP you reserved
+    kubernetes.io/ingress.global-static-ip-name: 'frontend-static-ip'
+    # Optional: Force redirect to HTTPS (recommended)
+    kubernetes.io/ingress.allow-http: 'false'
+spec:
+  # TLS section is not needed here as it's handled by ManagedCertificate
+  rules:
+    - host: dreamdev3.live # Replace with your actual domain name
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend # Your frontend service name
+                port:
+                  number: 80 # The port your frontend service listens on
