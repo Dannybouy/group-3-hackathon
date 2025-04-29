@@ -355,13 +355,50 @@ document.addEventListener("DOMContentLoaded", function(event) {
     const currentBalance = parseFloat(document.getElementById('current-balance').textContent.replace(/[$,]/g, ''));
     
     // If we don't have transactions or balance data yet, retry after a delay
-    if (transactionRows.length === 0 || isNaN(currentBalance)) {
-      console.log('Transaction data not loaded yet, retrying...');
+    if (isNaN(currentBalance)) {
+      console.log('Balance data not loaded yet, retrying...');
       setTimeout(calculateCreditScore, 500);
       return;
     }
 
-    // Get the last 3 months worth of transactions
+    // Remove any existing spinner
+    const creditScoreElement = document.getElementById('creditScoreValue');
+    const existingSpinner = creditScoreElement.querySelector('.spinner-border');
+    if (existingSpinner) {
+      existingSpinner.remove();
+    }
+    
+    // Check if the user has no transactions (new account)
+    if (transactionRows.length === 0) {
+      console.log('No transaction history found - new account detected');
+      
+      // Set credit score to 0 for new accounts
+      creditScoreElement.textContent = '0';
+      creditScoreElement.style.color = '#6c757d'; // Gray color for new accounts
+      creditScoreElement.style.borderBottom = '4px solid #6c757d';
+      
+      // Add new account styling classes
+      creditScoreElement.classList.add('new-account');
+      document.querySelector('.score-label').classList.add('new-account');
+      
+      // Update the progress bar to 0
+      const progressBar = document.getElementById('creditScoreProgress');
+      progressBar.style.width = '0%';
+      progressBar.setAttribute('aria-valuenow', '0');
+      progressBar.className = 'progress-bar bg-secondary';
+      
+      // Set all factor scores to 0/100
+      document.getElementById('balanceFactor').textContent = '0/100';
+      document.getElementById('frequencyFactor').textContent = '0/100';
+      document.getElementById('depositFactor').textContent = '0/100';
+      
+      // Update eligibility - new accounts are not eligible
+      updateNewAccountEligibility();
+      
+      return;
+    }
+
+    // Continue with regular credit score calculation for accounts with transactions
     const transactions = [];
     const transactionTypes = { CREDIT: [], DEBIT: [] };
     
@@ -409,12 +446,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     const finalScore = Math.floor(300 + (weightedScore * 5.5));
     
     // Update the credit score display
-    const creditScoreElement = document.getElementById('creditScoreValue');
-    // Remove any existing spinner
-    const existingSpinner = creditScoreElement.querySelector('.spinner-border');
-    if (existingSpinner) {
-      existingSpinner.remove();
-    }
     creditScoreElement.textContent = finalScore;
     
     // Update the progress bar
@@ -477,6 +508,29 @@ document.addEventListener("DOMContentLoaded", function(event) {
     );
     
     return Math.max(30, regularityScore); // Minimum of 30 points
+  }
+  
+  // Function to update eligibility UI for new accounts
+  function updateNewAccountEligibility() {
+    const eligibilityStatus = document.getElementById('eligibilityStatus');
+    const quickCashOptions = document.getElementById('quickCashOptions');
+    const quickCashIneligible = document.getElementById('quickCashIneligible');
+    const newAccountExplanation = document.getElementById('newAccountExplanation');
+    
+    // Clear loading status and show ineligible message
+    eligibilityStatus.textContent = '';
+    quickCashOptions.style.display = 'none';
+    
+    // Display custom message for new accounts
+    quickCashIneligible.style.display = 'block';
+    const ineligibleMessage = quickCashIneligible.querySelector('p.text-danger');
+    const ineligibleHelp = quickCashIneligible.querySelector('small.text-muted');
+    
+    ineligibleMessage.textContent = 'Welcome to Bank of Anthos! You have no credit score yet.';
+    ineligibleHelp.textContent = 'Start building your credit score by making deposits and transactions with your new account.';
+    
+    // Show the new account explanation
+    newAccountExplanation.style.display = 'block';
   }
   
   // Update Quick Cash eligibility UI
